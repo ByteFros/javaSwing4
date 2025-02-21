@@ -1,4 +1,4 @@
-package puntuaciones;
+package aaar.juegosmesa.gui.highscores;
 
 import javax.swing.*;
 import java.awt.*;

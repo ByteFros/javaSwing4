@@ -1,6 +1,6 @@
-package autentificacion;
+package aaar.juegosmesa.gui.authentication;
 
-import menu.MainMenu;
+import aaar.juegosmesa.gui.menu.MainMenuGUI;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,9 +13,9 @@ public class AuthGUI extends JFrame {
     private JTextField userField;
     private JPasswordField passField;
     private JButton registerButton, loginButton;
-    private MainMenu mainMenu;
+    private MainMenuGUI mainMenu;
 
-    public AuthGUI(MainMenu mainMenu) {
+    public AuthGUI(MainMenuGUI mainMenu) {
         this.mainMenu = mainMenu;
 
         // Configuración de la interfaz

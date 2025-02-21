@@ -1,8 +1,8 @@
-package menu;
+package aaar.juegosmesa.gui.menu;
 
-import autentificacion.AuthGUI;
-import juego.GameGui;
-import puntuaciones.HighScoresGUI;
+import aaar.juegosmesa.gui.authentication.AuthGUI;
+import aaar.juegosmesa.gui.game.GameGUI;
+import aaar.juegosmesa.gui.highscores.HighScoresGUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,12 +11,12 @@ import java.awt.event.ActionListener;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class MainMenu extends JFrame {
+public class MainMenuGUI extends JFrame {
     private ResourceBundle messages;
     private JButton playButton, createUserButton, viewScoresButton, highScoresButton, languageButton, loginButton;
     private boolean isLoggedIn = false;  // Estado de inicio de sesión
 
-    public MainMenu() {
+    public MainMenuGUI() {
         setTitle("Menú Principal");
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -50,9 +50,9 @@ public class MainMenu extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isLoggedIn) {
-                    new GameGui().setVisible(true); // Abre la interfaz del juego
+                    new GameGUI().setVisible(true); // Abre la interfaz del juego
                 } else {
-                    JOptionPane.showMessageDialog(MainMenu.this, "Debes iniciar sesión primero", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(MainMenuGUI.this, "Debes iniciar sesión primero", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -61,7 +61,7 @@ public class MainMenu extends JFrame {
         createUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenu.this).setVisible(true); // Abre la interfaz de autenticación
+                new AuthGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
             }
         });
 
@@ -78,18 +78,18 @@ public class MainMenu extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String[] options = {"Español", "Català", "English"};
-                String selectedLanguage = (String) JOptionPane.showInputDialog(
-                        MainMenu.this,
+                String selectedLanguage = (String) JOptionPane.showInputDialog(MainMenuGUI.this,
                         "Escoge un idioma",
                         "Idioma",
                         JOptionPane.QUESTION_MESSAGE,
                         null,
                         options,
-                        options[0]);
+                        options[0]
+                );
 
                 if (selectedLanguage != null) {
                     changeLanguage(selectedLanguage);
-                    JOptionPane.showMessageDialog(MainMenu.this, "Idioma seleccionado: " + selectedLanguage);
+                    JOptionPane.showMessageDialog(MainMenuGUI.this, "Idioma seleccionado: " + selectedLanguage);
                     // Actualizar los textos de los botones
                     playButton.setText(messages.getString("playButton"));
                     createUserButton.setText(messages.getString("createUserButton"));
@@ -104,7 +104,7 @@ public class MainMenu extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenu.this).setVisible(true); // Abre la interfaz de autenticación
+                new AuthGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
             }
         });
     }
@@ -131,14 +131,5 @@ public class MainMenu extends JFrame {
                 locale = new Locale("ca", "ES");
         }
         messages = ResourceBundle.getBundle("messages", locale);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainMenu().setVisible(true);
-            }
-        });
     }
 }
