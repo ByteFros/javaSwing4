@@ -4,6 +4,7 @@
  */
 package aaar.juegosmesa.gui.dblocation;
 
+import aaar.juegosmesa.gui.menu.MainMenuGUI;
 import aaar.juegosmesa.helpers.PathHelperFunctions;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,6 +13,7 @@ import java.io.FileWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -22,7 +24,7 @@ import javax.swing.event.DocumentListener;
 public class JDatabaseFilePathFrame
         extends javax.swing.JFrame
 {
-
+    private String dbFilePath = "";
     /**
      * Creates new form JDatabaseLocationFrame
      */
@@ -31,8 +33,10 @@ public class JDatabaseFilePathFrame
         jDatabaseFilePathTextField.getDocument().addDocumentListener(new DocumentListener() {
             private void updateConfirmButton() {
                 String path = jDatabaseFilePathTextField.getText();
-                jCreateDatabaseButton.setEnabled(PathHelperFunctions.isValidPath(path)
+                jCreateDatabaseButton.setEnabled(
+                        PathHelperFunctions.isValidPath(path)
                 );
+                dbFilePath = path;
             }
 
             @Override
@@ -149,16 +153,33 @@ public class JDatabaseFilePathFrame
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCreateDatabaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCreateDatabaseButtonActionPerformed
-        String dbFilePathStr = jDatabaseFilePathTextField.getText();
+        String dbFilePathStr = dbFilePath;
         try {
+            // create db file
             String initialContent = "";
             BufferedWriter writer = new BufferedWriter(
                     new FileWriter(dbFilePathStr)
             );
             writer.write(initialContent);
             writer.close();
+            
+            // write to user prefs
+            String prefsContent = dbFilePathStr + "\n";
+            BufferedWriter prefsWriter = new BufferedWriter(
+                    new FileWriter(".userPrefs")
+            );
+            prefsWriter.write(prefsContent);
+            prefsWriter.close();
         } catch (Exception e) {
             System.err.println(e.getMessage());
+        } finally {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    new MainMenuGUI().setVisible(true);
+                }
+            });
+            dispose();
         }
     }//GEN-LAST:event_jCreateDatabaseButtonActionPerformed
 
