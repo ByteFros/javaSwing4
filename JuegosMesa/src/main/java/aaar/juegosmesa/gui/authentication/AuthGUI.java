@@ -21,7 +21,7 @@ public class AuthGUI extends JFrame {
         // Configuración de la interfaz
         setTitle("Registro de Usuario");
         setSize(300, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
         userField = new JTextField(20);
