@@ -5,116 +5,107 @@ import autentificacion.RegisterGUI;
 import juego.GameGui;
 import puntuaciones.HighScoresGUI;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
 public class MainMenu extends JFrame {
     private ResourceBundle messages;
-    private JButton playButton, createUserButton, viewScoresButton, highScoresButton, languageButton, loginButton;
-    private boolean isLoggedIn = false;  // Estado de inicio de sesión
+    private JButton playButton, createUserButton, viewScoresButton, languageButton, loginButton;
+    private boolean isLoggedIn = false;
 
     public MainMenu() {
+        // Aplicar tema FlatLaf
+        try {
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         setTitle("Menú Principal");
-        setSize(400, 300);
+        setSize(450, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Cargar el idioma por defecto (Català)
         changeLanguage("Català");
 
         JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 1)); // 6 filas para los botones
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setBackground(new Color(30, 30, 30));
 
-        playButton = new JButton(messages.getString("playButton"));
-        createUserButton = new JButton(messages.getString("createUserButton"));
-        viewScoresButton = new JButton(messages.getString("viewScoresButton")); // Cambiar a Ver Puntuaciones
-        languageButton = new JButton(messages.getString("languageButton"));
-        loginButton = new JButton(messages.getString("loginButton"));
+        // Crear botones con iconos
+        playButton = createStyledButton(messages.getString("playButton"), "icons/play.svg");
+        createUserButton = createStyledButton(messages.getString("createUserButton"), "icons/user_add.svg");
+        viewScoresButton = createStyledButton(messages.getString("viewScoresButton"), "icons/score.svg");
+        languageButton = createStyledButton(messages.getString("languageButton"), "icons/language.svg");
+        loginButton = createStyledButton(messages.getString("loginButton"), "icons/login.svg");
+
+        playButton.setEnabled(false); // Deshabilitado por defecto
 
         panel.add(playButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaciador
         panel.add(createUserButton);
-        panel.add(viewScoresButton);  // Cambiar a Ver Puntuaciones
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(viewScoresButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         panel.add(languageButton);
-        panel.add(createUserButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         panel.add(loginButton);
 
         add(panel);
 
-        // Deshabilitar el botón "Jugar" por defecto
-        playButton.setEnabled(false);
-
-        // Acción para el botón "Jugar"
-        playButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (isLoggedIn) {
-                    new GameGui().setVisible(true); // Abre la interfaz del juego
-                } else {
-                    JOptionPane.showMessageDialog(MainMenu.this, "Debes iniciar sesión primero", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+        // Acciones de los botones
+        playButton.addActionListener(e -> {
+            if (isLoggedIn) {
+                new GameGui().setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this, "Debes iniciar sesión primero", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        // Acción para el botón "Crear Usuario"
-        createUserButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new RegisterGUI(MainMenu.this).setVisible(true); // Abre la interfaz de registro
+        createUserButton.addActionListener(e -> new RegisterGUI(this).setVisible(true));
+        viewScoresButton.addActionListener(e -> new HighScoresGUI().setVisible(true));
+
+        languageButton.addActionListener(e -> {
+            String[] options = {"Español", "Català", "English"};
+            String selectedLanguage = (String) JOptionPane.showInputDialog(
+                    this, "Escoge un idioma", "Idioma", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+            if (selectedLanguage != null) {
+                changeLanguage(selectedLanguage);
+                updateButtonLabels();
             }
         });
 
-        // Acción para el botón "Ver Puntuaciones" (renombrado)
-        viewScoresButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new HighScoresGUI().setVisible(true); // Abre la interfaz de puntuaciones
-            }
-        });
-
-        // Acción para el botón "Escoger Idioma"
-        languageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String[] options = {"Español", "Català", "English"};
-                String selectedLanguage = (String) JOptionPane.showInputDialog(
-                        MainMenu.this,
-                        "Escoge un idioma",
-                        "Idioma",
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
-
-                if (selectedLanguage != null) {
-                    changeLanguage(selectedLanguage);
-                    JOptionPane.showMessageDialog(MainMenu.this, "Idioma seleccionado: " + selectedLanguage);
-                    // Actualizar los textos de los botones
-                    playButton.setText(messages.getString("playButton"));
-                    createUserButton.setText(messages.getString("createUserButton"));
-                    viewScoresButton.setText(messages.getString("viewScoresButton"));
-                    languageButton.setText(messages.getString("languageButton"));
-                    loginButton.setText(messages.getString("loginButton"));
-                }
-            }
-        });
-
-        // Acción para el botón "Iniciar Sesión"
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new LoginGUI(MainMenu.this).setVisible(true); // Abre la interfaz de inicio de sesión
-            }
-        });
+        loginButton.addActionListener(e -> new LoginGUI(this).setVisible(true));
     }
 
-    // Este método permite habilitar el botón "Jugar" cuando el login es exitoso
+    private JButton createStyledButton(String text, String iconPath) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setBackground(new Color(50, 50, 50));
+        button.setForeground(Color.WHITE);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.setIcon(new FlatSVGIcon(iconPath, 20, 20));
+        return button;
+    }
+
+    private void updateButtonLabels() {
+        playButton.setText(messages.getString("playButton"));
+        createUserButton.setText(messages.getString("createUserButton"));
+        viewScoresButton.setText(messages.getString("viewScoresButton"));
+        languageButton.setText(messages.getString("languageButton"));
+        loginButton.setText(messages.getString("loginButton"));
+    }
+
     public void updatePlayButtonStatus(boolean isLoggedIn) {
-        this.isLoggedIn = isLoggedIn;  // Guardar el estado del login
-        playButton.setEnabled(isLoggedIn);  // Habilitar o deshabilitar el botón "Jugar"
+        this.isLoggedIn = isLoggedIn;
+        playButton.setEnabled(isLoggedIn);
     }
 
     private void changeLanguage(String language) {
@@ -136,11 +127,6 @@ public class MainMenu extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainMenu().setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater(() -> new MainMenu().setVisible(true));
     }
 }
