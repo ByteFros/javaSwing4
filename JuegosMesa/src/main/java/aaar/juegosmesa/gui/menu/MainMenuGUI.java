@@ -1,6 +1,7 @@
 package aaar.juegosmesa.gui.menu;
 
-import aaar.juegosmesa.gui.authentication.AuthGUI;
+import aaar.juegosmesa.gui.authentication.RegisterGUI;
+import aaar.juegosmesa.gui.authentication.LoginGUI;
 import aaar.juegosmesa.gui.game.GameGUI;
 import aaar.juegosmesa.gui.highscores.HighScoresGUI;
 
@@ -19,7 +20,7 @@ public class MainMenuGUI extends JFrame {
     public MainMenuGUI() {
         setTitle("Menú Principal");
         setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Cargar el idioma por defecto (Català)
@@ -35,9 +36,9 @@ public class MainMenuGUI extends JFrame {
         loginButton = new JButton(messages.getString("loginButton"));
 
         panel.add(playButton);
-        panel.add(createUserButton);
         panel.add(viewScoresButton);  // Cambiar a Ver Puntuaciones
         panel.add(languageButton);
+        panel.add(createUserButton);
         panel.add(loginButton);
 
         add(panel);
@@ -61,7 +62,7 @@ public class MainMenuGUI extends JFrame {
         createUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
+                new RegisterGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
             }
         });
 
@@ -104,7 +105,7 @@ public class MainMenuGUI extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
+                new LoginGUI(MainMenuGUI.this).setVisible(true); // Abre la interfaz de autenticación
             }
         });
     }
