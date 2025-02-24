@@ -1,6 +1,7 @@
 package menu;
 
-import autentificacion.AuthGUI;
+import autentificacion.LoginGUI;
+import autentificacion.RegisterGUI;
 import juego.GameGui;
 import puntuaciones.HighScoresGUI;
 
@@ -38,6 +39,7 @@ public class MainMenu extends JFrame {
         panel.add(createUserButton);
         panel.add(viewScoresButton);  // Cambiar a Ver Puntuaciones
         panel.add(languageButton);
+        panel.add(createUserButton);
         panel.add(loginButton);
 
         add(panel);
@@ -61,7 +63,7 @@ public class MainMenu extends JFrame {
         createUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenu.this).setVisible(true); // Abre la interfaz de autenticación
+                new RegisterGUI(MainMenu.this).setVisible(true); // Abre la interfaz de registro
             }
         });
 
@@ -104,7 +106,7 @@ public class MainMenu extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AuthGUI(MainMenu.this).setVisible(true); // Abre la interfaz de autenticación
+                new LoginGUI(MainMenu.this).setVisible(true); // Abre la interfaz de inicio de sesión
             }
         });
     }
