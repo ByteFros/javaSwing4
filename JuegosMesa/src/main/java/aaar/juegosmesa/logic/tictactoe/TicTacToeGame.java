@@ -12,6 +12,8 @@ public class TicTacToeGame {
     private char[][] board = new char[3][3];
     private boolean isXTurn = true;
     
+    public TicTacToeGame() {}
+    
     public boolean isXTurn() {
         return isXTurn;
     }
