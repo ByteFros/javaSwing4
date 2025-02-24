@@ -32,7 +32,10 @@ public class GameGui extends JFrame {
                             if (checkForWin()) {
                                 String winner = isXTurn ? "X" : "O";
                                 JOptionPane.showMessageDialog(GameGui.this, "¡El jugador " + winner + " ha ganado!");
-                                disableBoard();
+                                resetBoard();
+                            } else if (checkForDraw()) {
+                                JOptionPane.showMessageDialog(GameGui.this, "¡Es un empate!");
+                                resetBoard();
                             }
                             isXTurn = !isXTurn;
                         }
@@ -56,7 +59,7 @@ public class GameGui extends JFrame {
                 return true;
             }
         }
-        
+
         // Verificar diagonales
         if (buttons[0][0].getText().equals(buttons[1][1].getText()) && buttons[1][1].getText().equals(buttons[2][2].getText()) && !buttons[0][0].getText().isEmpty()) {
             return true;
@@ -66,6 +69,19 @@ public class GameGui extends JFrame {
         }
 
         return false;
+    }
+
+    // Verificar empate
+    private boolean checkForDraw() {
+        // Si todos los botones están ocupados y no hay ganador, es un empate
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (buttons[i][j].getText().isEmpty()) {
+                    return false; // Si hay algún espacio vacío, no es empate
+                }
+            }
+        }
+        return true; // Todos los espacios ocupados y sin ganador, es empate
     }
 
     // Deshabilitar los botones cuando el juego haya terminado
@@ -79,17 +95,18 @@ public class GameGui extends JFrame {
 
     // Verificar si el juego ya terminó (victoria o empate)
     private boolean gameOver() {
-        return checkForWin();
+        return checkForWin() || checkForDraw();
     }
 
     // Reiniciar el tablero
     public void resetBoard() {
+        // Habilitar los botones de nuevo
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 buttons[i][j].setText("");
                 buttons[i][j].setEnabled(true);  // Volver a habilitar los botones al reiniciar
             }
         }
-        isXTurn = true;
+        isXTurn = true;  // Iniciar con "X" nuevamente
     }
 }
