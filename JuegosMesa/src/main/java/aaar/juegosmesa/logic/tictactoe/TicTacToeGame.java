@@ -22,35 +22,48 @@ public class TicTacToeGame {
         return isXTurn();
     }
     
+    public char getCell(int row, int column) {
+        return board[row][column];
+    }    
+    public char setCell(char c, int row, int column) {
+        board[row][column] = c;
+        return c;
+    }
+    public boolean isCellEmpty(int row, int column) {
+        return (int)getCell(row,column) == 0;
+    }
+    
     // Verificar si hay una victoria (filas, columnas, diagonales)
-    private boolean checkForWin() {
+    public boolean checkForWin() {
         // Verificar filas y columnas
         for (int i = 0; i < 3; i++) {
-            final char top = board[0][i];
-            final char left = board[i][0];
+            // get topmost cell of column i
+            final char top = getCell(0,i);
+            // get leftmost cell of row i
+            final char left = getCell(i,0);
             
-            boolean rowLine = (int)left != 0;
-            boolean columnLine = (int)top != 0;
-            for (int j = 1; (rowLine || columnLine) && (j < 3); j++) {
-                rowLine = left == board[i][j];
-                columnLine = top == board[j][i];
+            boolean isFullRow = (int)left != 0;
+            boolean isFullColumn = (int)top != 0;
+            for (int j = 1; (isFullRow || isFullColumn) && (j < 3); j++) {
+                isFullRow &= left == getCell(i,j);
+                isFullColumn &= top == getCell(j,i);
             }
-            if (rowLine || columnLine) return true;
+            if (isFullRow || isFullColumn) return true;
         }
         
         // Verificar diagonales
-        final char tl = board[0][0];
-        final char bl = board[2][0];
-        boolean diagonalLineAsc = (int)tl != 0;
-        boolean diagonalLineDesc = (int)bl != 0;
+        final char tl = getCell(0,0);
+        final char bl = getCell(2,0);
+        boolean diagonalLineAsc = (int)bl != 0;
+        boolean diagonalLineDesc = (int)tl != 0;
         for (int i = 1; (diagonalLineAsc || diagonalLineDesc) && i < 3; i++) {
-            diagonalLineAsc = board[2-i][i] == bl;
-            diagonalLineDesc = board[i][i] == tl;
+            diagonalLineAsc &= getCell(2-i, i) == bl;
+            diagonalLineDesc &= getCell(i,i) == tl;
         }
         return diagonalLineAsc || diagonalLineDesc;
     }
     
-    private boolean checkForWin(int row, int column) {
+    public boolean checkForWin(int row, int column) {
         final char checkedSymbol = board[row][column];
         if ((int)checkedSymbol == 0) return false;
         
@@ -73,5 +86,30 @@ public class TicTacToeGame {
             diagonalLineDesc = board[r][r] == checkedSymbol;
         }
         return (diagonalLineAsc || diagonalLineDesc);
+    }
+    
+    // Verificar si el juego ya terminó (victoria o empate)
+    public boolean isGameOver() {
+        return isBoardFull() || checkForWin();
+    }
+    public boolean isBoardFull() {
+        int rowCount = board.length;
+        int colCount = board[0].length;
+        int cellCount = rowCount * colCount;
+        for (int ci = 0; (ci < cellCount); ci++) {
+            char c = board[ci / colCount][ci % colCount];
+            if ((int)c != 0) return false;
+        }
+        return true;
+    }
+    
+    // Reiniciar el tablero
+    public void resetBoard() {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                board[row][col] = '\0'; // replace this cell with a null character..
+            }
+        }
+        isXTurn = true;
     }
 }

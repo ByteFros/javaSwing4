@@ -32,7 +32,9 @@ public class JuegosMesa {
         boolean userPrefsFileExists = userPrefsFile.isFile();
         
         String databaseFilePath = null;
+        
         if (userPrefsFileExists) {
+            // read user prefs file to get database path
             List<String> userPrefsFileLines = new ArrayList<>();
             try {
                 BufferedReader br = new BufferedReader(
@@ -61,6 +63,8 @@ public class JuegosMesa {
                 System.err.println(e.getMessage());
             }
         }
+        // if database file path was not found in user prefs OR no database file exists there,
+        // then ask user to set a new location for the DB file.
         if ( databaseFilePath == null || !(new File(databaseFilePath).isFile()) ) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
@@ -69,6 +73,7 @@ public class JuegosMesa {
                 }
             });
         } else {
+            System.out.println("Database file found at: "+ databaseFilePath);
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
