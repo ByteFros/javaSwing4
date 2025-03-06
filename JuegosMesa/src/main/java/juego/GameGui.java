@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Tres en Raya con IA en tres dificultades.
@@ -317,10 +318,11 @@ public class GameGui extends JFrame {
         isXTurn = true;
     }
 
+
     private void saveStatsToCSV() {
         List<String> lines = new ArrayList<>();
         boolean userFound = false;
-
+    
         try (BufferedReader br = new BufferedReader(new FileReader("c:\\Users\\Admin\\Documents\\GitHub\\javaSwing4\\highscore.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -328,9 +330,15 @@ public class GameGui extends JFrame {
                     String[] parts = line.split(",");
                     int existingWins = Integer.parseInt(parts[1]);
                     int existingLosses = Integer.parseInt(parts[2]);
-                    line = String.format("%s,%d,%d,%.2f%%", 
-                        currentUsername, existingWins + wins, existingLosses + losses,
-                        ((double)(existingWins + wins) / (existingWins + wins + existingLosses + losses)) * 100);
+    
+                    // Calcular nuevas estadísticas
+                    int totalWins = existingWins + wins;
+                    int totalLosses = existingLosses + losses;
+                    int totalGames = totalWins + totalLosses;
+                    double winPercentage = (totalGames > 0) ? ((double) totalWins / totalGames) * 100 : 0;
+    
+                    // Formatear el porcentaje correctamente con punto decimal
+                    line = String.format(Locale.US, "%s,%d,%d,%.2f%%", currentUsername, totalWins, totalLosses, winPercentage);
                     userFound = true;
                 }
                 lines.add(line);
@@ -338,12 +346,12 @@ public class GameGui extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+    
         if (!userFound) {
-            double winPercentage = totalGames > 0 ? (double)wins / totalGames * 100 : 0;
-            lines.add(String.format("%s,%d,%d,%.2f%%", currentUsername, wins, losses, winPercentage));
+            double winPercentage = totalGames > 0 ? (double) wins / totalGames * 100 : 0;
+            lines.add(String.format(Locale.US, "%s,%d,%d,%.2f%%", currentUsername, wins, losses, winPercentage));
         }
-
+    
         try (FileWriter writer = new FileWriter("c:\\Users\\Admin\\Documents\\GitHub\\javaSwing4\\highscore.csv")) {
             for (String line : lines) {
                 writer.append(line).append("\n");
@@ -352,6 +360,7 @@ public class GameGui extends JFrame {
             e.printStackTrace();
         }
     }
+    
 
     // Método main para ejecutar la aplicación
 }
