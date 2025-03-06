@@ -10,6 +10,7 @@ import autentificacion.RegisterGUI;
 import idiomas.LanguageManager;
 import puntuaciones.HighScoresGUI;
 import juego.GameGui;
+import autentificacion.CurrentUser;
 
 public class MainMenu extends JFrame {
     private JButton playButton, registerButton, viewScoresButton, languageButton, loginButton;
@@ -59,7 +60,7 @@ public class MainMenu extends JFrame {
                             difficulties[0]);
 
                     if (selectedDifficulty != null) {
-                        new GameGui(selectedDifficulty).setVisible(true);
+                        new GameGui(selectedDifficulty, CurrentUser.getInstance().getUsername()).setVisible(true);
                     }
                 } else {
                     showMessageDialog(MainMenu.this, "loginRequired", "Error", JOptionPane.ERROR_MESSAGE);
