@@ -4,193 +4,175 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Random;
 
+/**
+ * Tres en Raya con IA en tres dificultades.
+ * Ejecuta el main para probar la funcionalidad.
+ */
 public class GameGui extends JFrame {
+
     private JButton[][] buttons = new JButton[3][3];
-    private boolean isXTurn = true; // Indica si es el turno del jugador
-    private String difficulty;
-    private Random random = new Random();
+    private boolean isXTurn = true;     // Indica si es el turno del jugador
+    private String difficulty;          // "easy", "medium" o "hard"
 
     public GameGui(String difficulty) {
-        this.difficulty = difficulty;
-        setTitle("Tres en Raya - " + difficulty.toUpperCase());
+        this.difficulty = difficulty.toLowerCase().trim();
+        setTitle("Tres en Raya - " + this.difficulty.toUpperCase());
         setSize(300, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 3));
+        // Panel con GridLayout para los 9 botones
+        JPanel panel = new JPanel(new GridLayout(3, 3));
 
+        // Crear los botones y agregar el ActionListener
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 buttons[i][j] = new JButton();
                 buttons[i][j].setFont(new Font("Arial", Font.PLAIN, 40));
-                final int row = i, col = j;
-
+                final int row = i;
+                final int col = j;
                 buttons[i][j].addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if (buttons[row][col].getText().isEmpty() && isXTurn) {
+                            // Jugada del jugador
                             buttons[row][col].setText("X");
 
-                            if (checkForWin()) { // Verifica si el jugador gana
+                            if (checkForWin()) {
                                 JOptionPane.showMessageDialog(null, "¡Has ganado!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                                 resetGame();
                                 return;
                             }
-
-                            if (isBoardFull()) { // Verifica si hay empate
+                            if (isBoardFull()) {
                                 JOptionPane.showMessageDialog(null, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                                 resetGame();
                                 return;
                             }
-
-                            isXTurn = false; // Cambia el turno a la IA
-                            playAI(); // La IA juega
+                            // Cambiar turno a la IA y jugar
+                            isXTurn = false;
+                            playAI();
                         }
                     }
                 });
-
                 panel.add(buttons[i][j]);
             }
         }
         add(panel);
+        setVisible(true);
     }
 
+    /**
+     * Lógica de la IA según la dificultad seleccionada.
+     */
     private void playAI() {
-        System.out.println("Iniciando la IA...");
+        System.out.println("IA: Iniciando la IA...");
+
         if (checkForWin() || isBoardFull()) {
             System.out.println("IA: El juego ya terminó, no se puede jugar.");
             return;
         }
 
         System.out.println("IA: Jugando en dificultad " + difficulty);
-
-        if (difficulty.equals("easy")) {
-            playRandomMove();
-        } else if (difficulty.equals("medium")) {
-            if (!playWinningMove("O")) {
-                if (!playWinningMove("X")) {
-                    playRandomMove();
+        switch (difficulty) {
+            case "easy":
+                playRandomMove();
+                break;
+            case "medium":
+                // Primero, buscar jugada ganadora para la IA (O)
+                if (!playWinningMove("O")) {
+                    // Luego, intentar bloquear la jugada ganadora del jugador (simulando "X")
+                    if (!playWinningMove("X")) {
+                        // Si no hay jugada ganadora ni bloqueo, hacer movimiento aleatorio
+                        playRandomMove();
+                    }
                 }
-            }
-        } else if (difficulty.equals("hard")) {
-            playBestMove();
+                break;
+            case "hard":
+                playBestMove();
+                break;
+            default:
+                playRandomMove();
+                break;
         }
-
 
         if (checkForWin()) {
             JOptionPane.showMessageDialog(this, "La IA ha ganado", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             resetGame();
             return;
         }
-
         if (isBoardFull()) {
             JOptionPane.showMessageDialog(this, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             resetGame();
             return;
         }
 
-        if (playRandomMove()) {
-            imprimirTablero();  // Ver el estado actualizado
-            isXTurn = true;  // Solo cambiar el turno después de jugar
-        }
+        imprimirTablero();
+        isXTurn = true;
         System.out.println("IA: Turno de la IA completado. Es el turno del jugador.");
-
+        revalidate();
+        repaint();
     }
 
-
-
-    // Función para imprimir el tablero
-    private void imprimirTablero() {
-        System.out.println("Estado del tablero:");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                String texto = buttons[i][j].getText();
-                if (texto.isEmpty()) {
-                    System.out.print("-");
-                } else {
-                    System.out.print(texto);
-                }
-            }
-            System.out.println();
-        }
-    }
-
+    /**
+     * Modo EASY: coloca "O" en la primera casilla vacía.
+     */
     private boolean playRandomMove() {
         System.out.println("IA: Buscando movimiento aleatorio...");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
                     System.out.println("IA: Jugando en posición (" + i + ", " + j + ")");
-
-                    // Realizar la jugada de la IA
-                    buttons[i][j].setText("O");  // Marcar la jugada
+                    buttons[i][j].setText("O");
                     System.out.println("Contenido del botón (" + i + ", " + j + "): " + buttons[i][j].getText());
-
-                    return true;  // Retornar true si se hizo una jugada
+                    return true;
                 }
             }
         }
-        return false;  // Si no hay movimiento disponible
+        return false;
     }
 
-    private void realizarJugadaIA() {
-        if (playRandomMove()) {  // La IA realiza su jugada
-            imprimirTablero();  // Ver el estado del tablero en consola
-
-            // Actualizar la interfaz gráfica
-
-
-            // Verificar si la IA gana
-            if (checkForWin()) {
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(null, "La IA ha ganado!");
-                });
-                return;  // Detener el juego inmediatamente
-            }
-
-            // Si la IA no gana, cambiar el turno al jugador
-            isXTurn = true;
-        }
-    }
-
-
+    /**
+     * Modo MEDIUM:
+     * Si se pasa "O", busca una jugada que le haga ganar a la IA.
+     * Si se pasa "X", simula la jugada del jugador y, si detecta que esa jugada ganaría,
+     * la revierte y coloca una "O" para bloquear.
+     */
     private boolean playWinningMove(String symbol) {
         System.out.println("IA: Buscando movimiento ganador para '" + symbol + "'...");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
-                    final int row = i;
-                    final int col = j;
-
-                    SwingUtilities.invokeLater(() -> {
-                        buttons[row][col].setText(symbol);
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                    // Simular la jugada
+                    buttons[i][j].setText(symbol);
+                    if (checkForWin()) {
+                        if (symbol.equals("X")) {
+                            // Bloquear: revertir el "X" y colocar "O"
+                            buttons[i][j].setText("O");
+                            System.out.println("IA: Bloqueo jugada ganadora del jugador en (" + i + ", " + j + ")");
+                        } else {
+                            System.out.println("IA: Jugada ganadora para O en (" + i + ", " + j + ")");
                         }
-                        buttons[row][col].repaint();
-                        buttons[row][col].revalidate();
-                    });
-
-                    System.out.println("IA: Movimiento ganador en (" + row + ", " + col + ")");
-                    return true;
+                        return true;
+                    } else {
+                        // Revertir la jugada simulada
+                        buttons[i][j].setText("");
+                    }
                 }
             }
         }
-        System.out.println("IA: No se encontraron movimientos ganadores.");
+        System.out.println("IA: No se encontraron movimientos ganadores para " + symbol);
         return false;
     }
 
-
+    /**
+     * Modo HARD: usa el algoritmo minimax para buscar la mejor jugada.
+     */
     private void playBestMove() {
-        System.out.println("IA: Buscando el mejor movimiento...");
+        System.out.println("IA: Buscando el mejor movimiento (minimax)...");
         int bestScore = Integer.MIN_VALUE;
-        int bestRow = -1, bestCol = -1;
-
+        int bestRow = -1;
+        int bestCol = -1;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
@@ -209,18 +191,19 @@ public class GameGui extends JFrame {
         System.out.println("IA: Mejor movimiento en (" + bestRow + ", " + bestCol + ")");
     }
 
+    /**
+     * Algoritmo minimax para evaluar el tablero.
+     * @param isMaximizing true si es turno de la IA, false si es turno del jugador.
+     * @return puntuación del tablero.
+     */
     private int minimax(boolean isMaximizing) {
         if (checkForWin()) {
-            System.out.println("IA: Minimax - Juego terminado. Puntuación: " + (isMaximizing ? -1 : 1)); // Mensaje de depuración
             return isMaximizing ? -1 : 1;
         }
         if (isBoardFull()) {
-            System.out.println("IA: Minimax - Empate. Puntuación: 0"); // Mensaje de depuración
             return 0;
         }
-
         int bestScore = isMaximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
@@ -231,58 +214,79 @@ public class GameGui extends JFrame {
                 }
             }
         }
-
-        System.out.println("IA: Minimax - Mejor puntuación encontrada: " + bestScore); // Mensaje de depuración
         return bestScore;
     }
 
+    /**
+     * Imprime el estado actual del tablero en la consola.
+     */
+    private void imprimirTablero() {
+        System.out.println("Estado del tablero:");
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                String txt = buttons[i][j].getText();
+                System.out.print(txt.isEmpty() ? "-" : txt);
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Verifica si hay 3 en raya en filas, columnas o diagonales.
+     */
     private boolean checkForWin() {
+        // Filas
         for (int i = 0; i < 3; i++) {
             if (!buttons[i][0].getText().isEmpty() &&
-                    buttons[i][0].getText().equals(buttons[i][1].getText()) &&
-                    buttons[i][0].getText().equals(buttons[i][2].getText())) {
-                System.out.println("IA: ¡Victoria detectada en la fila " + i + "! Contenido: "
-                        + buttons[i][0].getText() + buttons[i][1].getText() + buttons[i][2].getText());
-                return true;
-            }
-            if (!buttons[0][i].getText().isEmpty() &&
-                    buttons[0][i].getText().equals(buttons[1][i].getText()) &&
-                    buttons[0][i].getText().equals(buttons[2][i].getText())) {
-                System.out.println("IA: ¡Victoria detectada en la columna " + i + "! Contenido: "
-                        + buttons[0][i].getText() + buttons[1][i].getText() + buttons[2][i].getText());
+                buttons[i][0].getText().equals(buttons[i][1].getText()) &&
+                buttons[i][0].getText().equals(buttons[i][2].getText())) {
+                System.out.println("IA: ¡Victoria detectada en la fila " + i + "!");
                 return true;
             }
         }
+        // Columnas
+        for (int i = 0; i < 3; i++) {
+            if (!buttons[0][i].getText().isEmpty() &&
+                buttons[0][i].getText().equals(buttons[1][i].getText()) &&
+                buttons[0][i].getText().equals(buttons[2][i].getText())) {
+                System.out.println("IA: ¡Victoria detectada en la columna " + i + "!");
+                return true;
+            }
+        }
+        // Diagonal principal
         if (!buttons[0][0].getText().isEmpty() &&
-                buttons[0][0].getText().equals(buttons[1][1].getText()) &&
-                buttons[0][0].getText().equals(buttons[2][2].getText())) {
-            System.out.println("IA: ¡Victoria detectada en la diagonal principal! Contenido: "
-                    + buttons[0][0].getText() + buttons[1][1].getText() + buttons[2][2].getText());
+            buttons[0][0].getText().equals(buttons[1][1].getText()) &&
+            buttons[0][0].getText().equals(buttons[2][2].getText())) {
+            System.out.println("IA: ¡Victoria detectada en la diagonal principal!");
             return true;
         }
+        // Diagonal secundaria
         if (!buttons[0][2].getText().isEmpty() &&
-                buttons[0][2].getText().equals(buttons[1][1].getText()) &&
-                buttons[0][2].getText().equals(buttons[2][0].getText())) {
-            System.out.println("IA: ¡Victoria detectada en la diagonal secundaria! Contenido: "
-                    + buttons[0][2].getText() + buttons[1][1].getText() + buttons[2][0].getText());
+            buttons[0][2].getText().equals(buttons[1][1].getText()) &&
+            buttons[0][2].getText().equals(buttons[2][0].getText())) {
+            System.out.println("IA: ¡Victoria detectada en la diagonal secundaria!");
             return true;
         }
         return false;
     }
 
+    /**
+     * Comprueba si el tablero está lleno (empate).
+     */
     private boolean isBoardFull() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
-                    System.out.println("IA: Tablero no está lleno."); // Mensaje de depuración
                     return false;
                 }
             }
         }
-        System.out.println("IA: ¡Tablero lleno! Empate."); // Mensaje de depuración
         return true;
     }
 
+    /**
+     * Reinicia el tablero y asigna el turno al jugador.
+     */
     private void resetGame() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -291,4 +295,6 @@ public class GameGui extends JFrame {
         }
         isXTurn = true;
     }
+
+    // Método main para ejecutar la aplicación
 }
