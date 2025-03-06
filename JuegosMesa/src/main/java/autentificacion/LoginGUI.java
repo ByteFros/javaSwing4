@@ -43,6 +43,7 @@ public class LoginGUI extends JFrame {
                 String password = new String(passField.getPassword()).trim();
 
                 if (verificarCredenciales(username, password)) {
+                    CurrentUser.getInstance().setUsername(username);
                     String message = getMessage("loginSuccess") + " " + username;
                     showMessageDialog(LoginGUI.this, message, getMessage("successTitle"), JOptionPane.INFORMATION_MESSAGE);
                     dispose();
