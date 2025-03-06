@@ -1,7 +1,5 @@
 package juego;
 
-import idiomas.LanguageManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -99,17 +97,16 @@ public class GameGui extends JFrame {
         }
 
         if (checkForWin()) {
-            JOptionPane.showMessageDialog(this, LanguageManager.getInstance().getString("iaWins"),
-                    "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La IA ha ganado", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             resetGame();
             return;
         }
         if (isBoardFull()) {
-            JOptionPane.showMessageDialog(this, LanguageManager.getInstance().getString("draw"),
-                    "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE);
             resetGame();
             return;
         }
+
         imprimirTablero();
         isXTurn = true;
         System.out.println("IA: Turno de la IA completado. Es el turno del jugador.");
