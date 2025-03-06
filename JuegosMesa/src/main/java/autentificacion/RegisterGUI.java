@@ -1,53 +1,102 @@
 package autentificacion;
 
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import menu.MainMenu;
+import idiomas.LanguageManager;
 
 public class RegisterGUI extends JFrame {
-    public RegisterGUI() {
-        setTitle("Registre");
+    private JTextField userField;
+    private JPasswordField passField;
+    private JButton registerButton;
+    private MainMenu mainMenu;
+    private static final String filePath = "usuarios.csv";
+
+    public RegisterGUI(MainMenu mainMenu) {
+        this.mainMenu = mainMenu;
+
+        setTitle(getMessage("registerTitle"));
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(4, 2));
+        userField = new JTextField(20);
+        passField = new JPasswordField(20);
+        registerButton = new JButton(getMessage("registerButton"));
 
-        JLabel userLabel = new JLabel("Usuari:");
-        JTextField userField = new JTextField();
-        JLabel passLabel = new JLabel("Contrasenya:");
-        JPasswordField passField = new JPasswordField();
-        JButton registerButton = new JButton("Registrar");
-        JButton cancelButton = new JButton("Cancel·lar");
-
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(registerButton);
-        panel.add(cancelButton);
-
-        add(panel);
+        add(new JLabel(getMessage("usernameLabel")));
+        add(userField);
+        add(new JLabel(getMessage("passwordLabel")));
+        add(passField);
+        add(registerButton);
 
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = userField.getText();
-                String password = new String(passField.getPassword());
-                // Aquí puedes agregar la lógica para registrar el usuario
-                JOptionPane.showMessageDialog(RegisterGUI.this, "Usuari registrat: " + username);
+                String username = userField.getText().trim();
+                String password = new String(passField.getPassword()).trim();
+
+                if (username.isEmpty() || password.isEmpty()) {
+                    showMessageDialog(RegisterGUI.this, "emptyFieldsError", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (usuarioExiste(username)) {
+                    showMessageDialog(RegisterGUI.this, "userExistsError", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                guardarUsuarioEnCSV(username, password);
+                String message = getMessage("userRegistered") + " " + username;
+                showMessageDialog(RegisterGUI.this, message, getMessage("successTitle"), JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             }
         });
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private static void guardarUsuarioEnCSV(String username, String password) {
+        try (FileWriter writer = new FileWriter(filePath, true)) {
+            writer.append(username).append(",").append(password).append("\n");
+        } catch (IOException ex) {
+            showMessageDialog(null, "errorSavingUser", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static boolean usuarioExiste(String username) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] credentials = line.split(",");
+                if (credentials.length == 2 && credentials[0].equals(username)) {
+                    return true;
+                }
             }
-        });
+        } catch (IOException ex) {
+            showMessageDialog(null, "errorReadingFile", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
+    }
+
+    private static String getMessage(String key) {
+        try {
+            return LanguageManager.getInstance().getString(key);
+        } catch (java.util.MissingResourceException e) {
+            return "[" + key + "]";
+        }
+    }
+
+    private static void showMessageDialog(Component parentComponent, String key, String title, int messageType) {
+        String message = getMessage(key);
+        JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
     }
 }

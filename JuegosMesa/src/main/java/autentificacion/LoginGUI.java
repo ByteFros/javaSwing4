@@ -4,54 +4,84 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 import menu.MainMenu;
+import idiomas.LanguageManager;
 
 public class LoginGUI extends JFrame {
+    private JTextField userField;
+    private JPasswordField passField;
+    private JButton loginButton;
     private MainMenu mainMenu;
+    private static final String filePath = "usuarios.csv";
 
     public LoginGUI(MainMenu mainMenu) {
         this.mainMenu = mainMenu;
-        setTitle("Iniciar Sessió");
+
+        setTitle(getMessage("loginTitle"));
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 2));
+        userField = new JTextField(20);
+        passField = new JPasswordField(20);
+        loginButton = new JButton(getMessage("loginButton"));
 
-        JLabel userLabel = new JLabel("Usuari:");
-        JTextField userField = new JTextField();
-        JLabel passLabel = new JLabel("Contrasenya:");
-        JPasswordField passField = new JPasswordField();
-        JButton loginButton = new JButton("Iniciar Sessió");
-
-        panel.add(userLabel);
-        panel.add(userField);
-        panel.add(passLabel);
-        panel.add(passField);
-        panel.add(loginButton);
-        panel.add(new JLabel()); // Empty label for grid alignment
-
-        add(panel);
+        add(new JLabel(getMessage("usernameLabel")));
+        add(userField);
+        add(new JLabel(getMessage("passwordLabel")));
+        add(passField);
+        add(loginButton);
 
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = userField.getText();
-                String password = new String(passField.getPassword());
-                
-                // Here you would validate the credentials
-                boolean loginSuccessful = true; // Replace with actual validation
-                
-                if (loginSuccessful) {
-                    JOptionPane.showMessageDialog(LoginGUI.this, "Inici de sessió exitós: " + username);
-                    mainMenu.setLoggedIn(true); // Enable play button
+                String username = userField.getText().trim();
+                String password = new String(passField.getPassword()).trim();
+
+                if (verificarCredenciales(username, password)) {
+                    String message = getMessage("loginSuccess") + " " + username;
+                    showMessageDialog(LoginGUI.this, message, getMessage("successTitle"), JOptionPane.INFORMATION_MESSAGE);
                     dispose();
+                    mainMenu.updatePlayButtonStatus(true);
                 } else {
-                    JOptionPane.showMessageDialog(LoginGUI.this, "Error d'inici de sessió", 
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                    showMessageDialog(LoginGUI.this, "loginError", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private static boolean verificarCredenciales(String username, String password) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] credentials = line.split(",");
+                if (credentials.length == 2 && credentials[0].equals(username) && credentials[1].equals(password)) {
+                    return true;
+                }
+            }
+        } catch (IOException ex) {
+            showMessageDialog(null, "errorReadingFile", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return false;
+    }
+
+    private static String getMessage(String key) {
+        try {
+            return LanguageManager.getInstance().getString(key);
+        } catch (java.util.MissingResourceException e) {
+            return "[" + key + "]";
+        }
+    }
+
+    private static void showMessageDialog(Component parentComponent, String key, String title, int messageType) {
+        String message = getMessage(key);
+        JOptionPane.showMessageDialog(parentComponent, message, title, messageType);
     }
 }
