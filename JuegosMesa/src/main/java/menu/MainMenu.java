@@ -26,17 +26,18 @@ public class MainMenu extends JFrame {
         panel.setLayout(new GridLayout(5, 1, 10, 10));
         panel.setBackground(new Color(45, 45, 45));
 
-        playButton = createButton("Jugar", "icons/play.svg");
-        registerButton = createButton("Crear Usuario", "icons/user_add.svg");
-        viewScoresButton = createButton("Puntuaciones", "icons/score.svg");
-        languageButton = createButton("Idioma", "icons/language.svg");
-        loginButton = createButton("Iniciar Sesión", "icons/login.svg");
+        // Usar los mensajes localizados para los textos de los botones
+        playButton = createButton(getMessage("playButton"), "icons/play.svg");
+        loginButton = createButton(getMessage("loginButton"), "icons/login.svg");
+        registerButton = createButton(getMessage("registerButton"), "icons/user_add.svg");
+        viewScoresButton = createButton(getMessage("viewScoresButton"), "icons/score.svg");
+        languageButton = createButton(getMessage("languageButton"), "icons/language.svg");
 
         panel.add(playButton);
+        panel.add(loginButton);
         panel.add(registerButton);
         panel.add(viewScoresButton);
         panel.add(languageButton);
-        panel.add(loginButton);
 
         add(panel);
         playButton.setEnabled(false);
@@ -53,7 +54,7 @@ public class MainMenu extends JFrame {
                     String selectedDifficulty = (String) JOptionPane.showInputDialog(
                             MainMenu.this,
                             getMessage("chooseDifficulty"),
-                            "Dificultad",
+                            getMessage("chooseDifficulty"),
                             JOptionPane.QUESTION_MESSAGE,
                             null,
                             difficulties,
@@ -89,7 +90,7 @@ public class MainMenu extends JFrame {
                 String selectedLanguage = (String) JOptionPane.showInputDialog(
                         MainMenu.this,
                         getMessage("chooseLanguage"),
-                        "Idioma",
+                        getMessage("languageButton"),
                         JOptionPane.QUESTION_MESSAGE,
                         null,
                         options,
@@ -117,27 +118,27 @@ public class MainMenu extends JFrame {
             // Crear un icono SVG con tamaño personalizado
             FlatSVGIcon icon = new FlatSVGIcon(iconPath);
 
-            // Establecer un tamaño específico para el icono (ajusta estos valores según necesites)
-            // Alternativamente puedes usar un tamaño fijo:
-            icon =  icon.derive(15, 15);  // Establece el tamaño a 24x24 píxeles
+            // Establecer un tamaño específico para el icono
+            icon = icon.derive(15,15);  // Escala el icono a un 80% de su tamaño original
 
             button.setIcon(icon);
+
             // Estilo adicional para el botón
             button.setFocusPainted(false);
             button.setFont(new Font("SansSerif", Font.BOLD, 14));
-            button.setIconTextGap(10);
+            button.setIconTextGap(15);
 
-            // Opcional: centrar el icono y el texto
+            // Centrar el icono y el texto
             button.setHorizontalAlignment(SwingConstants.LEFT);
-            button.setIconTextGap(15); // Espacio entre icono y texto
 
-            // Opcional: añadir padding para que el botón se vea mejor
+            // Añadir padding para que el botón se vea mejor
             button.setMargin(new Insets(10, 15, 10, 15));
         } catch (Exception ex) {
             System.err.println("Error cargando icono: " + iconPath + " - " + ex.getMessage());
         }
         return button;
     }
+
     private String getMessage(String key) {
         return LanguageManager.getInstance().getString(key);
     }
