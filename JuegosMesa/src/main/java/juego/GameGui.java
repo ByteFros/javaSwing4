@@ -137,19 +137,26 @@ public class GameGui extends JFrame {
     }
 
     /**
-     * Modo EASY: coloca "O" en la primera casilla vacía.
+     * Modo EASY: coloca "O" en una casilla vacía al azar.
      */
     private boolean playRandomMove() {
         System.out.println("IA: Buscando movimiento aleatorio...");
+        List<int[]> emptyCells = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
-                    System.out.println("IA: Jugando en posición (" + i + ", " + j + ")");
-                    buttons[i][j].setText("O");
-                    System.out.println("Contenido del botón (" + i + ", " + j + "): " + buttons[i][j].getText());
-                    return true;
+                    emptyCells.add(new int[]{i, j});
                 }
             }
+        }
+        if (!emptyCells.isEmpty()) {
+            int[] randomCell = emptyCells.get((int) (Math.random() * emptyCells.size()));
+            int row = randomCell[0];
+            int col = randomCell[1];
+            System.out.println("IA: Jugando en posición (" + row + ", " + col + ")");
+            buttons[row][col].setText("O");
+            System.out.println("Contenido del botón (" + row + ", " + col + "): " + buttons[row][col].getText());
+            return true;
         }
         return false;
     }
