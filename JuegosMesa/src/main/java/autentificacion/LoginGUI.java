@@ -4,9 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import menu.MainMenu;
 
-public class AuthGUI extends JFrame {
-    public AuthGUI() {
+public class LoginGUI extends JFrame {
+    private MainMenu mainMenu;
+
+    public LoginGUI(MainMenu mainMenu) {
+        this.mainMenu = mainMenu;
         setTitle("Iniciar Sessió");
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -20,14 +24,13 @@ public class AuthGUI extends JFrame {
         JLabel passLabel = new JLabel("Contrasenya:");
         JPasswordField passField = new JPasswordField();
         JButton loginButton = new JButton("Iniciar Sessió");
-        JButton registerButton = new JButton("Registrar");
 
         panel.add(userLabel);
         panel.add(userField);
         panel.add(passLabel);
         panel.add(passField);
         panel.add(loginButton);
-        panel.add(registerButton);
+        panel.add(new JLabel()); // Empty label for grid alignment
 
         add(panel);
 
@@ -36,16 +39,18 @@ public class AuthGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String username = userField.getText();
                 String password = new String(passField.getPassword());
-                // Aquí puedes agregar la lógica para iniciar sesión
-                JOptionPane.showMessageDialog(AuthGUI.this, "Inici de sessió exitós: " + username);
-                dispose();
-            }
-        });
-
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new RegisterGUI().setVisible(true); // Abre la interfaz de registro
+                
+                // Here you would validate the credentials
+                boolean loginSuccessful = true; // Replace with actual validation
+                
+                if (loginSuccessful) {
+                    JOptionPane.showMessageDialog(LoginGUI.this, "Inici de sessió exitós: " + username);
+                    mainMenu.setLoggedIn(true); // Enable play button
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(LoginGUI.this, "Error d'inici de sessió", 
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
     }

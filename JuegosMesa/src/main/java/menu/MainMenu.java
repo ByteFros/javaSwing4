@@ -1,6 +1,6 @@
 package menu;
 
-import autentificacion.AuthGUI;
+import autentificacion.LoginGUI;
 import autentificacion.RegisterGUI;
 import juego.GameGui;
 import puntuaciones.HighScoresGUI;
@@ -14,6 +14,8 @@ import java.util.ResourceBundle;
 
 public class MainMenu extends JFrame {
     private ResourceBundle messages;
+    private boolean isLoggedIn = false;
+    private JButton playButton;
 
     public MainMenu() {
         setTitle("Menú Principal");
@@ -27,21 +29,23 @@ public class MainMenu extends JFrame {
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(7, 1)); // 7 filas para incluir todos los botones
 
-        JButton playButton = new JButton(messages.getString("playButton"));
-        JButton createUserButton = new JButton(messages.getString("createUserButton"));
+        playButton = new JButton(messages.getString("playButton"));
+        JButton registerButton = new JButton(messages.getString("createUserButton"));
+        JButton loginButton = new JButton(messages.getString("loginButton"));
         JButton deleteUserButton = new JButton(messages.getString("deleteUserButton"));
         JButton viewScoresButton = new JButton(messages.getString("viewScoresButton"));
         JButton highScoresButton = new JButton(messages.getString("highScoresButton"));
         JButton languageButton = new JButton(messages.getString("languageButton"));
-        JButton loginButton = new JButton(messages.getString("loginButton"));
+
+        playButton.setEnabled(false); // Disabled by default until login
 
         panel.add(playButton);
-        panel.add(createUserButton);
+        panel.add(loginButton);
+        panel.add(registerButton);
         panel.add(deleteUserButton);
         panel.add(viewScoresButton);
         panel.add(highScoresButton);
         panel.add(languageButton);
-        panel.add(loginButton);
 
         add(panel);
 
@@ -49,15 +53,23 @@ public class MainMenu extends JFrame {
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new GameGui().setVisible(true); // Abre la interfaz del juego
+                new GameGui().setVisible(true);
             }
         });
 
-        // Acción para el botón "Crear Usuari"
-        createUserButton.addActionListener(new ActionListener() {
+        // Acción para el botón "Registrar"
+        registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new RegisterGUI().setVisible(true); // Abre la interfaz de registro
+                new RegisterGUI().setVisible(true);
+            }
+        });
+
+        // Acción para el botón "Iniciar Sessió"
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new LoginGUI(MainMenu.this).setVisible(true);
             }
         });
 
@@ -65,7 +77,7 @@ public class MainMenu extends JFrame {
         highScoresButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new HighScoresGUI().setVisible(true); // Abre la interfaz de highscores
+                new HighScoresGUI().setVisible(true);
             }
         });
 
@@ -88,7 +100,7 @@ public class MainMenu extends JFrame {
                     JOptionPane.showMessageDialog(MainMenu.this, "Idioma seleccionado: " + selectedLanguage);
                     // Actualizar los textos de los botones
                     playButton.setText(messages.getString("playButton"));
-                    createUserButton.setText(messages.getString("createUserButton"));
+                    registerButton.setText(messages.getString("createUserButton"));
                     deleteUserButton.setText(messages.getString("deleteUserButton"));
                     viewScoresButton.setText(messages.getString("viewScoresButton"));
                     highScoresButton.setText(messages.getString("highScoresButton"));
@@ -97,14 +109,11 @@ public class MainMenu extends JFrame {
                 }
             }
         });
+    }
 
-        // Acción para el botón "Iniciar Sessió"
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                new AuthGUI().setVisible(true); // Abre la interfaz de autenticación
-            }
-        });
+    public void setLoggedIn(boolean loggedIn) {
+        this.isLoggedIn = loggedIn;
+        playButton.setEnabled(loggedIn);
     }
 
     private void changeLanguage(String language) {
