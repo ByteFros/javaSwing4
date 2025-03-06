@@ -366,6 +366,9 @@ public class GameGui extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        // Reset wins and losses after saving stats
+        wins = 0;
+        losses = 0;
     }
     
 
