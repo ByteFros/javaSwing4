@@ -17,7 +17,7 @@ public class HighScoresGUI extends JFrame {
         String[] columnNames = {"Jugador", "Ganadas", "Perdidas", "% Victorias"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0);
 
-        try (BufferedReader br = new BufferedReader(new FileReader("c:\\Users\\Admin\\Documents\\GitHub\\javaSwing4\\highscore.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("highscore.csv"))) {
             String line;
             System.out.println("Reading highscore.csv...");
             while ((line = br.readLine()) != null) {
