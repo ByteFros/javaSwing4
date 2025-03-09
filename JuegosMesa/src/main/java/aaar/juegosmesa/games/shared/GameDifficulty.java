@@ -8,7 +8,7 @@ import aaar.juegosmesa.lang.LanguageManager;
 
 /**
  *
- * @author sini
+ * @author rmartin
  */
 public enum GameDifficulty {
     EASY,

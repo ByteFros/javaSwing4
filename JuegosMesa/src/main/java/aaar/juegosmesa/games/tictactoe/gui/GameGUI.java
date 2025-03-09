@@ -1,6 +1,7 @@
 package aaar.juegosmesa.games.tictactoe.gui;
 
 import aaar.juegosmesa.games.shared.GameDifficulty;
+import aaar.juegosmesa.games.tictactoe.core.TicTacToeGame;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,8 +20,9 @@ import java.util.Locale;
  * Ejecuta el main para probar la funcionalidad.
  */
 public class GameGUI extends JFrame {
-
+    private TicTacToeGame gameLogic;
     private JButton[][] buttons = new JButton[3][3];
+    
     private boolean isXTurn = true;     // Indica si es el turno del jugador
     private GameDifficulty difficulty;          // "easy", "medium" o "hard"
     private int wins = 0;

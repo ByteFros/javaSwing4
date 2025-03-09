@@ -5,26 +5,37 @@
 package aaar.juegosmesa.games.tictactoe.core;
 
 import aaar.juegosmesa.games.shared.GameDifficulty;
+import static aaar.juegosmesa.games.shared.GameDifficulty.*;
+import aaar.juegosmesa.games.tictactoe.core.ai.TicTacToeAI;
+import aaar.juegosmesa.games.tictactoe.core.ai.TicTacToeEasyAI;
+import aaar.juegosmesa.games.tictactoe.core.ai.TicTacToeHardAI;
+import aaar.juegosmesa.games.tictactoe.core.ai.TicTacToeMediumAI;
 
 /**
  *
  * @author debi12
  */
 public class TicTacToeGame {
-    private final char[][] board = new char[3][3];
+    private final char[][] board;
     private boolean isXTurn = true;
     private GameDifficulty difficulty = GameDifficulty.MEDIUM;
-
-    public TicTacToeGame() {}
+    private TicTacToeAI aiPlayer;
+    
+    /* CONSTRUCTORS */
+    private TicTacToeGame() {
+        this.board = new char[3][3];
+    }
     
     public static TicTacToeGame getInstance(
             GameDifficulty difficulty
     ) {
         TicTacToeGame game = new TicTacToeGame();
         game.setDifficulty(difficulty);
+        game.initializeAI();
         return game;
     }
     
+    /* DIFFICULTY */
     public GameDifficulty getDifficulty() {
         return difficulty;
     }
@@ -32,6 +43,24 @@ public class TicTacToeGame {
         if (difficulty != null) this.difficulty = difficulty;
     }
     
+    private void initializeAI() {
+        this.aiPlayer = switch (difficulty) {
+            case HARD -> new TicTacToeHardAI(this);
+            case EASY -> new TicTacToeEasyAI(this);
+            default -> new TicTacToeMediumAI(this);
+        };
+    }
+    
+    /* BOARD SIZE */
+    public int getBoardSize() {
+        return getBoardRowCount();
+    }
+    public int getBoardColumnCount() {
+        return this.board[0].length;
+    }
+    public int getBoardRowCount() {
+        return this.board.length;
+    }
     
     /* turn methods */
     public boolean isXTurn() {
@@ -51,6 +80,11 @@ public class TicTacToeGame {
         board[row][column] = c;
         return c;
     }
+    public char clearCell(int row, int column) {
+        char c = getCell(row, column);
+        setCell('\0', row, column);
+        return c;
+    }
     public boolean isCellEmpty(int row, int column) {
         return (int)getCell(row,column) == 0;
     }
@@ -58,7 +92,8 @@ public class TicTacToeGame {
     // Verificar si hay una victoria (filas, columnas, diagonales)
     public boolean checkForWin() {
         // Verificar filas y columnas
-        for (int i = 0; i < 3; i++) {
+        final int size = getBoardSize();
+        for (int i = 0; i < size; i++) {
             // get topmost cell of column i
             final char top = getCell(0,i);
             // get leftmost cell of row i
@@ -66,7 +101,7 @@ public class TicTacToeGame {
             
             boolean isFullRow = (int)left != 0;
             boolean isFullColumn = (int)top != 0;
-            for (int j = 1; (isFullRow || isFullColumn) && (j < 3); j++) {
+            for (int j = 1; (isFullRow || isFullColumn) && (j < size); j++) {
                 isFullRow &= left == getCell(i,j);
                 isFullColumn &= top == getCell(j,i);
             }
@@ -74,38 +109,45 @@ public class TicTacToeGame {
         }
         
         // Verificar diagonales
+        final int lastIndex = size - 1;
         final char tl = getCell(0,0);
-        final char bl = getCell(2,0);
+        final char bl = getCell(lastIndex,0);
         boolean diagonalLineAsc = (int)bl != 0;
         boolean diagonalLineDesc = (int)tl != 0;
-        for (int i = 1; (diagonalLineAsc || diagonalLineDesc) && i < 3; i++) {
-            diagonalLineAsc &= getCell(2-i, i) == bl;
+        for (int i = 1; (diagonalLineAsc || diagonalLineDesc) && i < size; i++) {
+            diagonalLineAsc &= getCell(lastIndex-i, i) == bl;
             diagonalLineDesc &= getCell(i,i) == tl;
         }
         return diagonalLineAsc || diagonalLineDesc;
     }
     
+    // verificando si hay una victoria en la celda especificada.
     public boolean checkForWin(int row, int column) {
-        final char checkedSymbol = board[row][column];
+        final char checkedSymbol = getCell(row, column);
         if ((int)checkedSymbol == 0) return false;
         
+        // row line check
         boolean rowLine = true;
-        for (int c = 0; rowLine && (c < board[0].length); c++) {
-            rowLine = board[row][c] == checkedSymbol;
+        for (int c = 0; rowLine && (c < getBoardColumnCount()); c++) {
+            rowLine = getCell(row,c) == checkedSymbol;
         }
         if (rowLine) return true;
         
+        // column line check
         boolean columnLine = true;
-        for (int r = 0; columnLine && (r < board.length); r++) {
-            columnLine = board[r][column] == checkedSymbol;
+        for (int r = 0; columnLine && (r < getBoardRowCount()); r++) {
+            columnLine = getCell(r,column) == checkedSymbol;
         }
         if (columnLine) return true;
         
-        boolean diagonalLineAsc = board[1][1] == checkedSymbol;
+        // diagonals check
+        final int size = getBoardSize();
+        final int centerIndex = size/2;
+        boolean diagonalLineAsc = getCell(centerIndex,centerIndex) == checkedSymbol;
         boolean diagonalLineDesc = diagonalLineAsc;
-        for (int r = 0; (diagonalLineAsc || diagonalLineDesc) && (r < board.length); r++) {
-            diagonalLineAsc = board[2-r][r] == checkedSymbol;
-            diagonalLineDesc = board[r][r] == checkedSymbol;
+        for (int r = 0; (diagonalLineAsc || diagonalLineDesc) && (r < size); r++) {
+            diagonalLineAsc = getCell(size-1-r,r) == checkedSymbol;
+            diagonalLineDesc = getCell(r,r) == checkedSymbol;
         }
         return (diagonalLineAsc || diagonalLineDesc);
     }
@@ -115,21 +157,24 @@ public class TicTacToeGame {
         return isBoardFull() || checkForWin();
     }
     public boolean isBoardFull() {
-        int rowCount = board.length;
-        int colCount = board[0].length;
+        int rowCount = getBoardRowCount();
+        int colCount = getBoardColumnCount();
         int cellCount = rowCount * colCount;
         for (int ci = 0; (ci < cellCount); ci++) {
-            char c = board[ci / colCount][ci % colCount];
+            char c = getCell(
+                    ci / colCount,  // row
+                    ci % colCount   // column
+            );
             if ((int)c != 0) return false;
         }
         return true;
     }
     
-    // Reiniciar el tablero
+    // Reiniciar el tablero y establecer orden de turnos (el usuario juega primero).
     public void resetBoard() {
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                board[row][col] = '\0'; // replace this cell with a null character..
+        for (int row = 0; row < getBoardRowCount(); row++) {
+            for (int col = 0; col < getBoardColumnCount(); col++) {
+                setCell('\0', row,col); // replace this cell with a null character..
             }
         }
         isXTurn = true;
