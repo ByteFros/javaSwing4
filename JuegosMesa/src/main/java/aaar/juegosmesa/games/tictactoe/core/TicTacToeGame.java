@@ -17,8 +17,8 @@ import aaar.juegosmesa.games.tictactoe.core.ai.TicTacToeMediumAI;
  */
 public class TicTacToeGame {
     private final char[][] board;
-    private boolean isXTurn = true;
-    private GameDifficulty difficulty = GameDifficulty.MEDIUM;
+    private boolean isXTurn = true;                             // Indica si es el turno del jugador
+    private GameDifficulty difficulty = GameDifficulty.MEDIUM;  // "easy", "medium" o "hard"
     private TicTacToeAI aiPlayer;
     
     /* CONSTRUCTORS */
@@ -89,6 +89,11 @@ public class TicTacToeGame {
         return (int)getCell(row,column) == 0;
     }
     
+    // Verificar si el juego ya terminó (victoria o empate)
+    public boolean isGameOver() {
+        return isBoardFull() || checkForWin();
+    }
+    
     // Verificar si hay una victoria (filas, columnas, diagonales)
     public boolean checkForWin() {
         // Verificar filas y columnas
@@ -152,31 +157,39 @@ public class TicTacToeGame {
         return (diagonalLineAsc || diagonalLineDesc);
     }
     
-    // Verificar si el juego ya terminó (victoria o empate)
-    public boolean isGameOver() {
-        return isBoardFull() || checkForWin();
-    }
     public boolean isBoardFull() {
         int rowCount = getBoardRowCount();
         int colCount = getBoardColumnCount();
         int cellCount = rowCount * colCount;
         for (int ci = 0; (ci < cellCount); ci++) {
-            char c = getCell(
+            if (isCellEmpty(
                     ci / colCount,  // row
                     ci % colCount   // column
-            );
-            if ((int)c != 0) return false;
+            )) return false;
         }
         return true;
     }
     
-    // Reiniciar el tablero y establecer orden de turnos (el usuario juega primero).
+    public void playAI() {
+        aiPlayer.playTurn();
+    }
+    
+    /**
+     * Reinicia el tablero.
+     */
     public void resetBoard() {
         for (int row = 0; row < getBoardRowCount(); row++) {
             for (int col = 0; col < getBoardColumnCount(); col++) {
                 setCell('\0', row,col); // replace this cell with a null character..
             }
         }
+    }
+    /**
+     * Reinicia el tablero y asigna el turno al jugador.
+     */
+    public void reset() {
+        resetBoard();
         isXTurn = true;
     }
+    
 }

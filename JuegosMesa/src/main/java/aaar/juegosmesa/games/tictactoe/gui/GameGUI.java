@@ -23,17 +23,18 @@ public class GameGUI extends JFrame {
     private TicTacToeGame gameLogic;
     private JButton[][] buttons = new JButton[3][3];
     
-    private boolean isXTurn = true;     // Indica si es el turno del jugador
-    private GameDifficulty difficulty;          // "easy", "medium" o "hard"
     private int wins = 0;
     private int losses = 0;
     private int totalGames = 0;
     private String currentUsername;
 
     public GameGUI(GameDifficulty difficulty, String username) {
-        this.difficulty = difficulty;
+        this.gameLogic = TicTacToeGame.getInstance(difficulty);
         this.currentUsername = username;
-        setTitle("Tres en Raya - " + this.difficulty.toString().toUpperCase());
+        setTitle(
+                "Tres en Raya - "
+                + this.gameLogic.getDifficulty().toString().toUpperCase()
+        );
         setSize(300, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -54,29 +55,45 @@ public class GameGUI extends JFrame {
                 buttons[i][j].addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (buttons[row][col].getText().isEmpty() && isXTurn) {
-                            // Jugada del jugador
-                            buttons[row][col].setText("X");
-
-                            if (checkForWin()) {
-                                wins++;
-                                totalGames++;
-                                saveStatsToCSV();
-                                JOptionPane.showMessageDialog(null, "¡Has ganado!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-                                resetGame();
-                                return;
-                            }
-                            if (isBoardFull()) {
-                                totalGames++;
-                                saveStatsToCSV();
-                                JOptionPane.showMessageDialog(null, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE);
-                                resetGame();
-                                return;
-                            }
-                            // Cambiar turno a la IA y jugar
-                            isXTurn = false;
-                            playAI();
+                        if ( !(gameLogic.isXTurn() && gameLogic.isCellEmpty(row, col)) )
+                        {
+                            return;
                         }
+                        
+                        // Jugada del jugador
+                        gameLogic.setCell('X', row, col);
+                        repaintCell(row, col);
+
+                        // PLAYER WINS
+                        if (checkForWin()) {
+                            wins++;
+                            totalGames++;
+                            saveStatsToCSV();
+                            JOptionPane.showMessageDialog(
+                                null,
+                                "¡Has ganado!",
+                                "Game Over",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                            resetGame();
+                            return;
+                        }
+                        // DRAW
+                        if (isBoardFull()) {
+                            totalGames++;
+                            saveStatsToCSV();
+                            JOptionPane.showMessageDialog(
+                                null,
+                                "Empate",
+                                "Game Over",
+                                JOptionPane.INFORMATION_MESSAGE
+                            );
+                            resetGame();
+                            return;
+                        }
+                        // Cambiar turno a la IA y jugar
+                        gameLogic.startNextTurn();
+                        playAI();
                     }
                 });
                 panel.add(buttons[i][j]);
@@ -90,36 +107,11 @@ public class GameGUI extends JFrame {
      * Lógica de la IA según la dificultad seleccionada.
      */
     private void playAI() {
-        System.out.println("IA: Iniciando la IA...");
+        // let the AI player play its turn.
+        gameLogic.playAI();
+        repaintBoard();
 
-        if (checkForWin() || isBoardFull()) {
-            System.out.println("IA: El juego ya terminó, no se puede jugar.");
-            return;
-        }
-
-        System.out.println("IA: Jugando en dificultad " + difficulty.toString());
-        switch (difficulty) {
-            case EASY:
-                playRandomMove();
-                break;
-            case MEDIUM:
-                // Primero, buscar jugada ganadora para la IA (O)
-                if (!playWinningMove("O")) {
-                    // Luego, intentar bloquear la jugada ganadora del jugador (simulando "X")
-                    if (!playWinningMove("X")) {
-                        // Si no hay jugada ganadora ni bloqueo, hacer movimiento aleatorio
-                        playRandomMove();
-                    }
-                }
-                break;
-            case HARD:
-                playBestMove();
-                break;
-            default:
-                playRandomMove();
-                break;
-        }
-
+        // AI WINS
         if (checkForWin()) {
             losses++;
             totalGames++;
@@ -130,6 +122,7 @@ public class GameGUI extends JFrame {
             resetGame();
             return;
         }
+        // DRAW
         if (isBoardFull()) {
             totalGames++;
             saveStatsToCSV();
@@ -141,120 +134,12 @@ public class GameGUI extends JFrame {
         }
 
         imprimirTablero();
-        isXTurn = true;
+        gameLogic.startNextTurn(); // devolver el turno al jugador.
+        repaintBoard();
+        
         System.out.println("IA: Turno de la IA completado. Es el turno del jugador.");
         revalidate();
         repaint();
-    }
-
-    /**
-     * Modo EASY: coloca "O" en una casilla vacía al azar.
-     */
-    private boolean playRandomMove() {
-        System.out.println("IA: Buscando movimiento aleatorio...");
-        List<int[]> emptyCells = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    emptyCells.add(new int[]{i, j});
-                }
-            }
-        }
-        if (!emptyCells.isEmpty()) {
-            int[] randomCell = emptyCells.get((int) (Math.random() * emptyCells.size()));
-            int row = randomCell[0];
-            int col = randomCell[1];
-            System.out.println("IA: Jugando en posición (" + row + ", " + col + ")");
-            buttons[row][col].setText("O");
-            System.out.println("Contenido del botón (" + row + ", " + col + "): " + buttons[row][col].getText());
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Modo MEDIUM:
-     * Si se pasa "O", busca una jugada que le haga ganar a la IA.
-     * Si se pasa "X", simula la jugada del jugador y, si detecta que esa jugada ganaría,
-     * la revierte y coloca una "O" para bloquear.
-     */
-    private boolean playWinningMove(String symbol) {
-        System.out.println("IA: Buscando movimiento ganador para '" + symbol + "'...");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    // Simular la jugada
-                    buttons[i][j].setText(symbol);
-                    if (checkForWin()) {
-                        if (symbol.equals("X")) {
-                            // Bloquear: revertir el "X" y colocar "O"
-                            buttons[i][j].setText("O");
-                            System.out.println("IA: Bloqueo jugada ganadora del jugador en (" + i + ", " + j + ")");
-                        } else {
-                            System.out.println("IA: Jugada ganadora para O en (" + i + ", " + j + ")");
-                        }
-                        return true;
-                    } else {
-                        // Revertir la jugada simulada
-                        buttons[i][j].setText("");
-                    }
-                }
-            }
-        }
-        System.out.println("IA: No se encontraron movimientos ganadores para " + symbol);
-        return false;
-    }
-
-    /**
-     * Modo HARD: usa el algoritmo minimax para buscar la mejor jugada.
-     */
-    private void playBestMove() {
-        System.out.println("IA: Buscando el mejor movimiento (minimax)...");
-        int bestScore = Integer.MIN_VALUE;
-        int bestRow = -1;
-        int bestCol = -1;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    buttons[i][j].setText("O");
-                    int score = minimax(false);
-                    buttons[i][j].setText("");
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestRow = i;
-                        bestCol = j;
-                    }
-                }
-            }
-        }
-        buttons[bestRow][bestCol].setText("O");
-        System.out.println("IA: Mejor movimiento en (" + bestRow + ", " + bestCol + ")");
-    }
-
-    /**
-     * Algoritmo minimax para evaluar el tablero.
-     * @param isMaximizing true si es turno de la IA, false si es turno del jugador.
-     * @return puntuación del tablero.
-     */
-    private int minimax(boolean isMaximizing) {
-        if (checkForWin()) {
-            return isMaximizing ? -1 : 1;
-        }
-        if (isBoardFull()) {
-            return 0;
-        }
-        int bestScore = isMaximizing ? Integer.MIN_VALUE : Integer.MAX_VALUE;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    buttons[i][j].setText(isMaximizing ? "O" : "X");
-                    int score = minimax(!isMaximizing);
-                    buttons[i][j].setText("");
-                    bestScore = isMaximizing ? Math.max(score, bestScore) : Math.min(score, bestScore);
-                }
-            }
-        }
-        return bestScore;
     }
 
     /**
@@ -264,76 +149,64 @@ public class GameGUI extends JFrame {
         System.out.println("Estado del tablero:");
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                String txt = buttons[i][j].getText();
-                System.out.print(txt.isEmpty() ? "-" : txt);
+                char txt = gameLogic.getCell(i, j);
+                System.out.print(txt == '\0' ? "-" : txt);
             }
             System.out.println();
         }
     }
 
+    /* GAME LOGIC-RELATED METHODS*/
     /**
      * Verifica si hay 3 en raya en filas, columnas o diagonales.
      */
     private boolean checkForWin() {
-        // Filas
-        for (int i = 0; i < 3; i++) {
-            if (!buttons[i][0].getText().isEmpty() &&
-                buttons[i][0].getText().equals(buttons[i][1].getText()) &&
-                buttons[i][0].getText().equals(buttons[i][2].getText())) {
-                System.out.println("IA: ¡Victoria detectada en la fila " + i + "!");
-                return true;
-            }
-        }
-        // Columnas
-        for (int i = 0; i < 3; i++) {
-            if (!buttons[0][i].getText().isEmpty() &&
-                buttons[0][i].getText().equals(buttons[1][i].getText()) &&
-                buttons[0][i].getText().equals(buttons[2][i].getText())) {
-                System.out.println("IA: ¡Victoria detectada en la columna " + i + "!");
-                return true;
-            }
-        }
-        // Diagonal principal
-        if (!buttons[0][0].getText().isEmpty() &&
-            buttons[0][0].getText().equals(buttons[1][1].getText()) &&
-            buttons[0][0].getText().equals(buttons[2][2].getText())) {
-            System.out.println("IA: ¡Victoria detectada en la diagonal principal!");
-            return true;
-        }
-        // Diagonal secundaria
-        if (!buttons[0][2].getText().isEmpty() &&
-            buttons[0][2].getText().equals(buttons[1][1].getText()) &&
-            buttons[0][2].getText().equals(buttons[2][0].getText())) {
-            System.out.println("IA: ¡Victoria detectada en la diagonal secundaria!");
-            return true;
-        }
-        return false;
+        return gameLogic.checkForWin();
     }
 
     /**
      * Comprueba si el tablero está lleno (empate).
      */
     private boolean isBoardFull() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return gameLogic.isBoardFull();
     }
 
     /**
      * Reinicia el tablero y asigna el turno al jugador.
      */
     private void resetGame() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                buttons[i][j].setText("");
+        gameLogic.reset();
+        repaintBoard();
+    }
+    
+    public String getCell(int row, int column) {
+        char c = gameLogic.getCell(row, column);
+        return switch (c) {
+            case '\0'
+                -> "";
+            default
+                -> String.valueOf(c);
+        };
+    }
+    
+    /* GUI METHODS */
+    private void repaintCell(int row, int column) {
+        buttons[row][column].setText(
+            getCell(row, column)
+        );
+    }
+    private void repaintCell(int row, int column, boolean isEnabled) {
+        repaintCell(row, column);
+        buttons[row][column].setEnabled(isEnabled);
+    }
+    private void repaintBoard() {
+        final boolean isEnabled = !gameLogic.isGameOver();
+        final int size = gameLogic.getBoardSize();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                repaintCell(row, col, isEnabled);
             }
         }
-        isXTurn = true;
     }
 
 
