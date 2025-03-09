@@ -1,10 +1,12 @@
-package juego;
+package aaar.juegosmesa.games.tictactoe.gui;
 
+import aaar.juegosmesa.games.shared.GameDifficulty;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,20 +18,20 @@ import java.util.Locale;
  * Tres en Raya con IA en tres dificultades.
  * Ejecuta el main para probar la funcionalidad.
  */
-public class GameGui extends JFrame {
+public class GameGUI extends JFrame {
 
     private JButton[][] buttons = new JButton[3][3];
     private boolean isXTurn = true;     // Indica si es el turno del jugador
-    private String difficulty;          // "easy", "medium" o "hard"
+    private GameDifficulty difficulty;          // "easy", "medium" o "hard"
     private int wins = 0;
     private int losses = 0;
     private int totalGames = 0;
     private String currentUsername;
 
-    public GameGui(String difficulty, String username) {
-        this.difficulty = difficulty.toLowerCase().trim();
+    public GameGUI(GameDifficulty difficulty, String username) {
+        this.difficulty = difficulty;
         this.currentUsername = username;
-        setTitle("Tres en Raya - " + this.difficulty.toUpperCase());
+        setTitle("Tres en Raya - " + this.difficulty.toString().toUpperCase());
         setSize(300, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -37,11 +39,14 @@ public class GameGui extends JFrame {
         // Panel con GridLayout para los 9 botones
         JPanel panel = new JPanel(new GridLayout(3, 3));
 
+        // Fuente de los botones.
+        final Font buttonFont = new Font("Arial", Font.PLAIN, 40);
+        
         // Crear los botones y agregar el ActionListener
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 buttons[i][j] = new JButton();
-                buttons[i][j].setFont(new Font("Arial", Font.PLAIN, 40));
+                buttons[i][j].setFont(buttonFont);
                 final int row = i;
                 final int col = j;
                 buttons[i][j].addActionListener(new ActionListener() {
@@ -90,12 +95,12 @@ public class GameGui extends JFrame {
             return;
         }
 
-        System.out.println("IA: Jugando en dificultad " + difficulty);
+        System.out.println("IA: Jugando en dificultad " + difficulty.toString());
         switch (difficulty) {
-            case "easy":
+            case EASY:
                 playRandomMove();
                 break;
-            case "medium":
+            case MEDIUM:
                 // Primero, buscar jugada ganadora para la IA (O)
                 if (!playWinningMove("O")) {
                     // Luego, intentar bloquear la jugada ganadora del jugador (simulando "X")
@@ -105,7 +110,7 @@ public class GameGui extends JFrame {
                     }
                 }
                 break;
-            case "hard":
+            case HARD:
                 playBestMove();
                 break;
             default:
@@ -117,14 +122,18 @@ public class GameGui extends JFrame {
             losses++;
             totalGames++;
             saveStatsToCSV();
-            JOptionPane.showMessageDialog(this, "La IA ha ganado", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this, "La IA ha ganado", "Game Over", JOptionPane.INFORMATION_MESSAGE
+            );
             resetGame();
             return;
         }
         if (isBoardFull()) {
             totalGames++;
             saveStatsToCSV();
-            JOptionPane.showMessageDialog(this, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this, "Empate", "Game Over", JOptionPane.INFORMATION_MESSAGE
+            );
             resetGame();
             return;
         }
@@ -330,7 +339,11 @@ public class GameGui extends JFrame {
         List<String> lines = new ArrayList<>();
         boolean userFound = false;
     
-        try (BufferedReader br = new BufferedReader(new FileReader("c:\\Users\\Admin\\Documents\\GitHub\\javaSwing4\\highscore.csv"))) {
+        try (
+            BufferedReader br = new BufferedReader(
+                new FileReader("highscore.csv")
+            )
+        ) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.startsWith(currentUsername + ",")) {
@@ -359,7 +372,12 @@ public class GameGui extends JFrame {
             lines.add(String.format(Locale.US, "%s,%d,%d,%.2f%%", currentUsername, wins, losses, winPercentage));
         }
     
-        try (FileWriter writer = new FileWriter("c:\\Users\\Admin\\Documents\\GitHub\\javaSwing4\\highscore.csv")) {
+        //final String separator = File.separator;
+        try (
+                FileWriter writer = new FileWriter(
+                        "highscore.csv"
+                )
+        ) {
             for (String line : lines) {
                 writer.append(line).append("\n");
             }

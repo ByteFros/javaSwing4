@@ -36,3 +36,8 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### user save files ###
+.userPrefs
+.usuarios.csv
+.highscore.csv

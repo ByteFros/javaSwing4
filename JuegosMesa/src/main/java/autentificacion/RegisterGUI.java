@@ -9,17 +9,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import menu.MainMenu;
-import idiomas.LanguageManager;
+import aaar.juegosmesa.gui.menu.MainMenuGUI;
+import aaar.juegosmesa.lang.LanguageManager;
 
 public class RegisterGUI extends JFrame {
     private JTextField userField;
     private JPasswordField passField;
     private JButton registerButton;
-    private MainMenu mainMenu;
+    private MainMenuGUI mainMenu;
     private static final String filePath = "usuarios.csv";
 
-    public RegisterGUI(MainMenu mainMenu) {
+    public RegisterGUI(MainMenuGUI mainMenu) {
         this.mainMenu = mainMenu;
 
         setTitle(getMessage("registerTitle"));

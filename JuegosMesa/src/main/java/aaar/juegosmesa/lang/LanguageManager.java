@@ -1,4 +1,4 @@
-package idiomas;
+package aaar.juegosmesa.lang;
 
 import java.util.Locale;
 import java.util.MissingResourceException;

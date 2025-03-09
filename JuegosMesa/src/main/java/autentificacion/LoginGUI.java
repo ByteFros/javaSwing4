@@ -8,17 +8,17 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-import menu.MainMenu;
-import idiomas.LanguageManager;
+import aaar.juegosmesa.gui.menu.MainMenuGUI;
+import aaar.juegosmesa.lang.LanguageManager;
 
 public class LoginGUI extends JFrame {
     private JTextField userField;
     private JPasswordField passField;
     private JButton loginButton;
-    private MainMenu mainMenu;
+    private MainMenuGUI mainMenu;
     private static final String filePath = "usuarios.csv";
 
-    public LoginGUI(MainMenu mainMenu) {
+    public LoginGUI(MainMenuGUI mainMenu) {
         this.mainMenu = mainMenu;
 
         setTitle(getMessage("loginTitle"));

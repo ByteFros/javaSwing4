@@ -1,4 +1,8 @@
-package menu;
+package aaar.juegosmesa.gui.menu;
+
+import aaar.juegosmesa.games.shared.GameDifficulty;
+import aaar.juegosmesa.lang.LanguageManager;
+import aaar.juegosmesa.games.tictactoe.gui.GameGUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,17 +11,14 @@ import java.awt.event.ActionListener;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import autentificacion.LoginGUI;
 import autentificacion.RegisterGUI;
-import com.formdev.flatlaf.FlatDarkLaf;
-import idiomas.LanguageManager;
 import puntuaciones.HighScoresGUI;
-import juego.GameGui;
 import autentificacion.CurrentUser;
 
-public class MainMenu extends JFrame {
+public class MainMenuGUI extends JFrame {
     private JButton playButton, registerButton, viewScoresButton, languageButton, loginButton;
-    private boolean isLoggedIn = false;
+    private boolean isLoggedIn = false;  // Estado de inicio de sesión
 
-    public MainMenu() {
+    public MainMenuGUI() {
         setTitle(getMessage("mainMenuTitle"));
         setSize(450, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,11 +29,26 @@ public class MainMenu extends JFrame {
         panel.setBackground(new Color(45, 45, 45));
 
         // Usar los mensajes localizados para los textos de los botones
-        playButton = createButton(getMessage("playButton"), "icons/play.svg");
-        loginButton = createButton(getMessage("loginButton"), "icons/login.svg");
-        registerButton = createButton(getMessage("registerButton"), "icons/user_add.svg");
-        viewScoresButton = createButton(getMessage("viewScoresButton"), "icons/score.svg");
-        languageButton = createButton(getMessage("languageButton"), "icons/language.svg");
+        playButton = createButton(
+                getMessage("playButton"),
+                "icons/play.svg"
+        );
+        loginButton = createButton(
+                getMessage("loginButton"),
+                "icons/login.svg"
+        );
+        registerButton = createButton(
+                getMessage("registerButton"),
+                "icons/user_add.svg"
+        );
+        viewScoresButton = createButton(
+                getMessage("viewScoresButton"),
+                "icons/score.svg"
+        );
+        languageButton = createButton(
+                getMessage("languageButton"),
+                "icons/language.svg"
+        );
 
         panel.add(playButton);
         panel.add(loginButton);
@@ -41,31 +57,43 @@ public class MainMenu extends JFrame {
         panel.add(languageButton);
 
         add(panel);
+        // Deshabilitar el botón "Jugar" por defecto
         playButton.setEnabled(false);
 
+        // Acción para el botón "Jugar"
         playButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (isLoggedIn) {
-                    String[] difficulties = {
-                            LanguageManager.getInstance().getString("easy"),
-                            LanguageManager.getInstance().getString("medium"),
-                            LanguageManager.getInstance().getString("hard")
+                    final GameDifficulty[] difficulties = {
+                            GameDifficulty.EASY,
+                            GameDifficulty.MEDIUM,
+                            GameDifficulty.HARD
                     };
-                    String selectedDifficulty = (String) JOptionPane.showInputDialog(
-                            MainMenu.this,
+                    GameDifficulty selectedDifficulty = (GameDifficulty) JOptionPane.showInputDialog(
+                            MainMenuGUI.this,
                             getMessage("chooseDifficulty"),
                             getMessage("chooseDifficulty"),
                             JOptionPane.QUESTION_MESSAGE,
                             null,
                             difficulties,
-                            difficulties[0]);
+                            difficulties[0]
+                    );
 
-                    if (selectedDifficulty != null) {
-                        new GameGui(selectedDifficulty, CurrentUser.getInstance().getUsername()).setVisible(true);
-                    }
+                    if (selectedDifficulty == null) return;
+                    
+                    // Abre la interfaz del juego
+                    new GameGUI(
+                            selectedDifficulty,
+                            CurrentUser.getInstance().getUsername()
+                    ).setVisible(true);
                 } else {
-                    showMessageDialog(MainMenu.this, "loginRequired", "Error", JOptionPane.ERROR_MESSAGE);
+                    showMessageDialog(
+                        MainMenuGUI.this, 
+                        "loginRequired", 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE
+                    );
                 }
             }
         });
@@ -73,7 +101,7 @@ public class MainMenu extends JFrame {
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new RegisterGUI(MainMenu.this).setVisible(true);
+                new RegisterGUI(MainMenuGUI.this).setVisible(true);
             }
         });
 
@@ -89,18 +117,19 @@ public class MainMenu extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String[] options = { "Español", "Català", "English" };
                 String selectedLanguage = (String) JOptionPane.showInputDialog(
-                        MainMenu.this,
+                        MainMenuGUI.this,
                         getMessage("chooseLanguage"),
                         getMessage("languageButton"),
                         JOptionPane.QUESTION_MESSAGE,
                         null,
                         options,
-                        options[0]);
+                        options[0]
+                );
 
                 if (selectedLanguage != null) {
                     LanguageManager.getInstance().changeLanguage(selectedLanguage);
                     dispose();  // Cierra la ventana actual
-                    new MainMenu().setVisible(true);  // Abre una nueva instancia de la interfaz gráfica
+                    new MainMenuGUI().setVisible(true);  // Abre una nueva instancia de la interfaz gráfica
                 }
             }
         });
@@ -108,7 +137,7 @@ public class MainMenu extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new LoginGUI(MainMenu.this).setVisible(true);
+                new LoginGUI(MainMenuGUI.this).setVisible(true);
             }
         });
     }
@@ -152,32 +181,5 @@ public class MainMenu extends JFrame {
     public void updatePlayButtonStatus(boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
         playButton.setEnabled(isLoggedIn);
-    }
-
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel(new FlatDarkLaf());
-
-            // Configurar fuente personalizada
-            Font customFont = new Font("SansSerif", Font.BOLD, 16);
-            UIManager.put("Button.font", customFont);
-            UIManager.put("Label.font", customFont);
-            UIManager.put("Panel.font", customFont);
-            UIManager.put("OptionPane.messageFont", customFont);
-            UIManager.put("OptionPane.buttonFont", customFont);
-
-            // Opcional: Botones redondeados
-            UIManager.put("Button.arc", 20);
-            UIManager.put("Component.arc", 15);
-
-        } catch (Exception ex) {
-            System.err.println("Error al aplicar FlatLaf: " + ex.getMessage());
-        }
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainMenu().setVisible(true);
-            }
-        });
     }
 }
