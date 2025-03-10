@@ -1,4 +1,4 @@
-package autentificacion;
+package aaar.juegosmesa.authentication;
 
 public class CurrentUser {
     private static CurrentUser instance;

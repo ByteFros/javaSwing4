@@ -6,6 +6,7 @@ package aaar.juegosmesa;
 
 import aaar.juegosmesa.gui.dblocation.JDatabaseFilePathFrame;
 import aaar.juegosmesa.gui.menu.MainMenuGUI;
+import aaar.juegosmesa.storage.StorageManager;
 import com.formdev.flatlaf.FlatDarkLaf;
 import java.awt.Font;
 import java.io.BufferedReader;
@@ -25,8 +26,6 @@ import javax.swing.UIManager;
  * @author rmartin
  */
 public class JuegosMesa {
-    static final String USER_PREFS_FILENAME = ".userPrefs"; // user prefs file (relative path).
-    
     public static void main(String[] args) {
         // FlatLaf
         try {
@@ -49,11 +48,14 @@ public class JuegosMesa {
         }
         
         // get userPrefs file's relative path
-        Path userPrefsRelativePath = Paths.get(USER_PREFS_FILENAME);
+        final String userPrefsFileName = StorageManager.getUserPrefsFileName();
+        Path userPrefsRelativePath = Paths.get(
+                userPrefsFileName
+        );
         File userPrefsFile = userPrefsRelativePath.toFile();
         boolean userPrefsFileExists = userPrefsFile.isFile();
         
-        String databaseFilePath = null;
+        String databaseDirectory = null;
         if (userPrefsFileExists) {
             // read user prefs file to get database path
             List<String> userPrefsFileLines = new ArrayList<>();
@@ -67,27 +69,38 @@ public class JuegosMesa {
                 while ((line = br.readLine()) != null) {
                     userPrefsFileLines.add(line);
                 }
-                databaseFilePath = userPrefsFileLines.get(0);
+                databaseDirectory = userPrefsFileLines.get(0);
                 br.close();
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                System.err.println(
+                        "Error al intentar leer las preferencias de usuario: "
+                        + e.getMessage()
+                );
             }
         } else {
             // try to create user prefs file.
             try {
                 String initialContent = "";
                 BufferedWriter writer = new BufferedWriter(
-                        new FileWriter(USER_PREFS_FILENAME)
+                        new FileWriter(userPrefsFileName)
                 );
                 writer.write(initialContent);
                 writer.close();
             } catch (Exception e) {
-                System.err.println(e.getMessage());
+                System.err.println(
+                        "Error al intentar crear archivo de preferencias de usuario: "
+                        + e.getMessage()
+                );
             }
         }
-        // if database file path was not found in user prefs OR no database file exists there,
+        
+        final boolean dbDirectoryMissing =
+                databaseDirectory == null
+                || !(new File(databaseDirectory).isDirectory())
+        ;
+        // if database directory path was not found in user prefs OR no database file exists there,
         // then ask user to set a new location for the DB file.
-        if ( databaseFilePath == null || !(new File(databaseFilePath).isFile()) ) {
+        if ( dbDirectoryMissing ) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

@@ -2,17 +2,17 @@ package aaar.juegosmesa.gui.menu;
 
 import aaar.juegosmesa.games.shared.GameDifficulty;
 import aaar.juegosmesa.lang.LanguageManager;
-import aaar.juegosmesa.games.tictactoe.gui.GameGUI;
+import aaar.juegosmesa.games.tictactoe.gui.TicTacToeGameGUI;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-import autentificacion.LoginGUI;
-import autentificacion.RegisterGUI;
+import aaar.juegosmesa.gui.authentication.LoginGUI;
+import aaar.juegosmesa.gui.authentication.RegisterGUI;
 import puntuaciones.HighScoresGUI;
-import autentificacion.CurrentUser;
+import aaar.juegosmesa.authentication.CurrentUser;
 
 public class MainMenuGUI extends JFrame {
     private JButton playButton, registerButton, viewScoresButton, languageButton, loginButton;
@@ -83,7 +83,7 @@ public class MainMenuGUI extends JFrame {
                     if (selectedDifficulty == null) return;
                     
                     // Abre la interfaz del juego
-                    new GameGUI(
+                    new TicTacToeGameGUI(
                             selectedDifficulty,
                             CurrentUser.getInstance().getUsername()
                     ).setVisible(true);

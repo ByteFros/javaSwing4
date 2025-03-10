@@ -19,7 +19,7 @@ import java.util.Locale;
  * Tres en Raya con IA en tres dificultades.
  * Ejecuta el main para probar la funcionalidad.
  */
-public class GameGUI extends JFrame {
+public class TicTacToeGameGUI extends JFrame {
     private TicTacToeGame gameLogic;
     private JButton[][] buttons = new JButton[3][3];
     
@@ -28,7 +28,7 @@ public class GameGUI extends JFrame {
     private int totalGames = 0;
     private String currentUsername;
 
-    public GameGUI(GameDifficulty difficulty, String username) {
+    public TicTacToeGameGUI(GameDifficulty difficulty, String username) {
         this.gameLogic = TicTacToeGame.getInstance(difficulty);
         this.currentUsername = username;
         setTitle(
@@ -44,10 +44,11 @@ public class GameGUI extends JFrame {
 
         // Fuente de los botones.
         final Font buttonFont = new Font("Arial", Font.PLAIN, 40);
+        final int boardSize = gameLogic.getBoardSize();
         
         // Crear los botones y agregar el ActionListener
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
                 buttons[i][j] = new JButton();
                 buttons[i][j].setFont(buttonFont);
                 final int row = i;

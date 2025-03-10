@@ -6,10 +6,13 @@ package aaar.juegosmesa.gui.dblocation;
 
 import aaar.juegosmesa.gui.menu.MainMenuGUI;
 import aaar.juegosmesa.helpers.PathHelperFunctions;
+import aaar.juegosmesa.storage.StorageManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.swing.JFileChooser;
@@ -24,7 +27,7 @@ import javax.swing.event.DocumentListener;
 public class JDatabaseFilePathFrame
         extends javax.swing.JFrame
 {
-    private String dbFilePath = "";
+    private String dbDirectoryPath = "";
     /**
      * Creates new form JDatabaseLocationFrame
      */
@@ -36,7 +39,7 @@ public class JDatabaseFilePathFrame
                 jCreateDatabaseButton.setEnabled(
                         PathHelperFunctions.isValidPath(path)
                 );
-                dbFilePath = path;
+                dbDirectoryPath = path;
             }
 
             @Override
@@ -78,6 +81,7 @@ public class JDatabaseFilePathFrame
         jDatabaseFileChooser.setApproveButtonText("");
         jDatabaseFileChooser.setCurrentDirectory(null);
         jDatabaseFileChooser.setDialogTitle("");
+        jDatabaseFileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         jDatabaseFileChooser.setSelectedFiles(null);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -153,23 +157,46 @@ public class JDatabaseFilePathFrame
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCreateDatabaseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCreateDatabaseButtonActionPerformed
-        String dbFilePathStr = dbFilePath;
+        String dbDirectoryPathStr = dbDirectoryPath;
         try {
-            // create db file
-            String initialContent = "";
-            BufferedWriter writer = new BufferedWriter(
-                    new FileWriter(dbFilePathStr)
-            );
-            writer.write(initialContent);
-            writer.close();
+            Path dbDirectoryPath = Paths.get(dbDirectoryPathStr).toAbsolutePath();            
+            Files.createDirectories(dbDirectoryPath);
             
+            Path usersPath = dbDirectoryPath.resolve(
+                    StorageManager.getUsersFileName()
+            );
+            Path highscoresPath = dbDirectoryPath.resolve(
+                    StorageManager.getHighscoresFileName()
+            );
+            Path[] paths = new Path[]{usersPath, highscoresPath};
+            
+            String prefsContent = "";
+            for (Path p : paths) {
+                final File f = p.toFile();
+                if (!f.isFile()) {
+                    final String absPath = f.getAbsolutePath();
+                    
+                    // create storage files
+                    final String initialContent = "";
+                    BufferedWriter writer = new BufferedWriter(
+                            new FileWriter(absPath)
+                    );
+                    writer.write(initialContent);
+                    writer.close();
+                    
+                    // prepare content for
+                    prefsContent += absPath + "\n";
+                }
+            }
             // write to user prefs
-            String prefsContent = dbFilePathStr + "\n";
             BufferedWriter prefsWriter = new BufferedWriter(
-                    new FileWriter(".userPrefs")
+                    new FileWriter(
+                            StorageManager.getUserPrefsFileName()
+                    )
             );
             prefsWriter.write(prefsContent);
             prefsWriter.close();
+            
         } catch (Exception e) {
             System.err.println(e.getMessage());
         } finally {
