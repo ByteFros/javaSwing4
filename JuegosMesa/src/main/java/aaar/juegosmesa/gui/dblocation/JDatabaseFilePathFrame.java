@@ -170,7 +170,7 @@ public class JDatabaseFilePathFrame
             );
             Path[] paths = new Path[]{usersPath, highscoresPath};
             
-            String prefsContent = "";
+            // create db files
             for (Path p : paths) {
                 final File f = p.toFile();
                 if (!f.isFile()) {
@@ -183,12 +183,11 @@ public class JDatabaseFilePathFrame
                     );
                     writer.write(initialContent);
                     writer.close();
-                    
-                    // prepare content for
-                    prefsContent += absPath + "\n";
                 }
             }
+            
             // write to user prefs
+            String prefsContent = dbDirectoryPath.toString() + "\n";
             BufferedWriter prefsWriter = new BufferedWriter(
                     new FileWriter(
                             StorageManager.getUserPrefsFileName()

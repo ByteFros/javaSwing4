@@ -11,13 +11,13 @@ import java.io.IOException;
 
 import aaar.juegosmesa.gui.menu.MainMenuGUI;
 import aaar.juegosmesa.lang.LanguageManager;
+import aaar.juegosmesa.storage.StorageManager;
 
 public class RegisterGUI extends JFrame {
     private JTextField userField;
     private JPasswordField passField;
     private JButton registerButton;
     private MainMenuGUI mainMenu;
-    private static final String filePath = "usuarios.csv";
 
     public RegisterGUI(MainMenuGUI mainMenu) {
         this.mainMenu = mainMenu;
@@ -65,7 +65,8 @@ public class RegisterGUI extends JFrame {
     }
 
     private static void guardarUsuarioEnCSV(String username, String password) {
-        try (FileWriter writer = new FileWriter(filePath, true)) {
+        StorageManager sm = StorageManager.getInstance();
+        try (FileWriter writer = new FileWriter(sm.getUsersFilePath().toFile(), true)) {
             writer.append(username).append(",").append(password).append("\n");
         } catch (IOException ex) {
             showMessageDialog(null, "errorSavingUser", "Error", JOptionPane.ERROR_MESSAGE);
@@ -73,7 +74,8 @@ public class RegisterGUI extends JFrame {
     }
 
     private static boolean usuarioExiste(String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        StorageManager sm = StorageManager.getInstance();
+        try (BufferedReader reader = new BufferedReader(new FileReader(sm.getUsersFilePath().toFile()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] credentials = line.split(",");

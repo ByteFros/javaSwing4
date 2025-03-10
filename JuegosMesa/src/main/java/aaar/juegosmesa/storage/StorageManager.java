@@ -4,8 +4,13 @@
  */
 package aaar.juegosmesa.storage;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -18,19 +23,79 @@ public class StorageManager {
 
     private static StorageManager instance;
     
+    private Path storageDirectoryPath;
     private Path highscoresFilePath;
     private Path usersFilePath;
     
     private StorageManager() {}
     
     public static StorageManager getInstance() {
-        if (instance == null) instance = new StorageManager();
+        if (instance == null) {
+            instance = new StorageManager();
+            try {
+                final File userPrefsFile = Paths.get(
+                        StorageManager.getUserPrefsFileName()
+                ).toFile();
+                if (userPrefsFile.isFile()) {
+                    String databaseDirectory = null;
+                    // read user prefs file to get database path
+                    List<String> userPrefsFileLines = new ArrayList<>();
+                    try {
+                        BufferedReader br = new BufferedReader(
+                                new FileReader(
+                                        userPrefsFile.getAbsolutePath()
+                                )
+                        );
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            userPrefsFileLines.add(line);
+                        }
+                        databaseDirectory = userPrefsFileLines.get(0);
+                        br.close();
+                    } catch (Exception e) {
+                        System.err.println(
+                                "Error al intentar leer las preferencias de usuario: "
+                                + e.getMessage()
+                        );
+                    }
+                    
+                    if (new File(databaseDirectory).isDirectory()) {
+                        instance.setStorageDirectoryPath(
+                                Paths.get(databaseDirectory)
+                        );
+                        instance.setHighscoresFilePath(
+                            instance.storageDirectoryPath.resolve(
+                                StorageManager.getHighscoresFileName()
+                            )
+                        );
+                        instance.setUsersFilePath(
+                            instance.storageDirectoryPath.resolve(
+                                StorageManager.getUsersFileName()
+                            )
+                        );
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
         return instance;
     }
     
     public static String getUserPrefsFileName()
     {
         return USER_PREFS_FILENAME;
+    }
+    
+    public Path getStorageDirectoryPath()
+    {
+        return storageDirectoryPath;
+    }
+    public boolean setStorageDirectoryPath(Path path)
+    {
+        boolean success = path.toFile().isDirectory();
+        if (success) storageDirectoryPath = path;
+        return success;
     }
     
     public static String getHighscoresFileName()

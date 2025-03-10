@@ -2,6 +2,7 @@ package aaar.juegosmesa.games.tictactoe.gui;
 
 import aaar.juegosmesa.games.shared.GameDifficulty;
 import aaar.juegosmesa.games.tictactoe.core.TicTacToeGame;
+import aaar.juegosmesa.storage.StorageManager;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -212,12 +213,13 @@ public class TicTacToeGameGUI extends JFrame {
 
 
     private void saveStatsToCSV() {
+        StorageManager sm = StorageManager.getInstance();
         List<String> lines = new ArrayList<>();
         boolean userFound = false;
     
         try (
             BufferedReader br = new BufferedReader(
-                new FileReader("highscore.csv")
+                new FileReader(sm.getHighscoresFilePath().toFile())
             )
         ) {
             String line;
@@ -251,7 +253,7 @@ public class TicTacToeGameGUI extends JFrame {
         //final String separator = File.separator;
         try (
                 FileWriter writer = new FileWriter(
-                        "highscore.csv"
+                        sm.getHighscoresFilePath().toString()
                 )
         ) {
             for (String line : lines) {

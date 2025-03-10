@@ -11,13 +11,13 @@ import java.io.IOException;
 
 import aaar.juegosmesa.gui.menu.MainMenuGUI;
 import aaar.juegosmesa.lang.LanguageManager;
+import aaar.juegosmesa.storage.StorageManager;
 
 public class LoginGUI extends JFrame {
     private JTextField userField;
     private JPasswordField passField;
     private JButton loginButton;
     private MainMenuGUI mainMenu;
-    private static final String filePath = "usuarios.csv";
 
     public LoginGUI(MainMenuGUI mainMenu) {
         this.mainMenu = mainMenu;
@@ -60,7 +60,12 @@ public class LoginGUI extends JFrame {
     }
 
     private static boolean verificarCredenciales(String username, String password) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        StorageManager sm = StorageManager.getInstance();
+        try (
+                BufferedReader reader = new BufferedReader(
+                        new FileReader(sm.getUsersFilePath().toFile())
+                )
+        ) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] credentials = line.split(",");

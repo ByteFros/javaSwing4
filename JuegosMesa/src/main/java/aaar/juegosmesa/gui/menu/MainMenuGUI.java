@@ -11,7 +11,7 @@ import java.awt.event.ActionListener;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import aaar.juegosmesa.gui.authentication.LoginGUI;
 import aaar.juegosmesa.gui.authentication.RegisterGUI;
-import puntuaciones.HighScoresGUI;
+import aaar.juegosmesa.gui.highscores.HighScoresGUI;
 import aaar.juegosmesa.authentication.CurrentUser;
 
 public class MainMenuGUI extends JFrame {
